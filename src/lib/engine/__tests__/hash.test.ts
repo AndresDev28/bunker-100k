@@ -19,8 +19,9 @@ const normalizeDate = (raw: string, _fmt?: string): string => {
   // Inline stub for W2 — parseDate properly lands in W5
   // Accepts DD/MM/YYYY or YYYY-MM-DD and returns YYYY-MM-DD
   if (raw.includes('/')) {
-    const [d, m, y] = raw.split('/');
-    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    const parts = raw.split('/');
+    const [d, m, y] = parts;
+    return `${y}-${m?.padStart(2, '0') ?? ''}-${d?.padStart(2, '0') ?? ''}`;
   }
   return raw; // already YYYY-MM-DD
 };
@@ -76,15 +77,27 @@ describe('T-1 SHA-256 hash idempotency', () => {
     const dateA = normalizeDate('01/03/2026', 'DD/MM/YYYY');
     const dateB = normalizeDate('2026-03-01', 'YYYY-MM-DD');
 
-    const hashA = hashTransaction({ date: dateA, cleanedDescription: cleanDescription(desc), amount });
-    const hashB = hashTransaction({ date: dateB, cleanedDescription: cleanDescription(desc), amount });
+    const hashA = hashTransaction({
+      date: dateA,
+      cleanedDescription: cleanDescription(desc),
+      amount,
+    });
+    const hashB = hashTransaction({
+      date: dateB,
+      cleanedDescription: cleanDescription(desc),
+      amount,
+    });
 
     expect(dateA).toBe(dateB); // normalizeDate produces same ISODate
     expect(hashA).toBe(hashB); // same ISODate → same hash
   });
 
   it('same input twice: hash is stable (determinism property)', () => {
-    const input = { date: '2026-03-01', cleanedDescription: cleanDescription('GLOVO *Order#123'), amount: -12.5 };
+    const input = {
+      date: '2026-03-01',
+      cleanedDescription: cleanDescription('GLOVO *Order#123'),
+      amount: -12.5,
+    };
 
     const hash1 = hashTransaction(input);
     const hash2 = hashTransaction(input);
