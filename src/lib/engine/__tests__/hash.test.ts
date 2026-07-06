@@ -1,30 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { hashTransaction } from '@/lib/engine/hash';
 import { cleanDescription } from '@/lib/engine/cleanDescription';
+import { parseDate } from '@/lib/engine/parseDate';
 
 /**
  * T-1 SHA-256 idempotency — hash builds on W1 (cleanDescription).
  *
  * Test structure:
  * - Uses cleanDescription (W1) as the normalizer for description
- * - Inlines date normalization to ISODate strings (parseDate lands in W5)
+ * - Uses parseDate (W5) for date normalization to ISODate strings
  * - Verifies identical normalized triples → identical hash (idempotency)
  * - Verifies different triples → different hash (collision resistance)
  * - Verifies cross-format fixture: same logical date via different input strings
  *
  * REQ-DEDUP-1: identical {date, cleanedDescription, amount} → identical id
  */
-
-const normalizeDate = (raw: string, _fmt?: string): string => {
-  // Inline stub for W2 — parseDate properly lands in W5
-  // Accepts DD/MM/YYYY or YYYY-MM-DD and returns YYYY-MM-DD
-  if (raw.includes('/')) {
-    const parts = raw.split('/');
-    const [d, m, y] = parts;
-    return `${y}-${m?.padStart(2, '0') ?? ''}-${d?.padStart(2, '0') ?? ''}`;
-  }
-  return raw; // already YYYY-MM-DD
-};
 
 describe('T-1 SHA-256 hash idempotency', () => {
   it('identical normalized triple produces identical hash (idempotency)', () => {
@@ -74,8 +64,8 @@ describe('T-1 SHA-256 hash idempotency', () => {
     const amount = -12.5;
 
     // Two different input formats for the same logical date
-    const dateA = normalizeDate('01/03/2026', 'DD/MM/YYYY');
-    const dateB = normalizeDate('2026-03-01', 'YYYY-MM-DD');
+    const dateA = parseDate('01/03/2026', 'DD/MM/YYYY');
+    const dateB = parseDate('2026-03-01', 'YYYY-MM-DD');
 
     const hashA = hashTransaction({
       date: dateA,
