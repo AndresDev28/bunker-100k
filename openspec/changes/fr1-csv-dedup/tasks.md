@@ -105,9 +105,9 @@ Estimated: ~150–220 lines.
 ### W6 — T-5 filesystem-source Server Action [production]
 Depends on: W0, W5, W2. Gate: `ingestFromFolder('/data/raw/*.csv')` returns full `IngestResult` + honors `dataDir` override.
 
-- [ ] 6.1 `src/app/actions/__tests__/ingest-from-folder.test.ts` — RED: folder scan, `dataDir` override, `BUNKER_DATA_DIR` env, default `ownerId='self'`.
-- [ ] 6.2 `src/app/actions/ingestFromFolder.ts` — GREEN: `'use server'`, scan `${dataDir:-/data}/raw/*.csv`, route to `ingestTransactions`.
-- [ ] 6.3 `src/app/actions/ingestTransactions.ts` — GREEN: shared internal `ingestTransactions(rows, ownerId)` (acquisition-agnostic, reusable by FR-N upload).
+- [x] 6.1 `src/app/actions/__tests__/ingest-from-folder.test.ts` — RED: folder scan, `dataDir` override, `BUNKER_DATA_DIR` env, default `ownerId='self'`.
+- [x] 6.2 `src/app/actions/ingestFromFolder.ts` — GREEN: `'use server'`, scan `${dataDir:-/data}/raw/*.csv`, route to `ingestTransactions`.
+- [x] 6.3 `src/app/actions/ingestTransactions.ts` — GREEN: shared internal `ingestTransactions(rows, ownerId)` (acquisition-agnostic, reusable by FR-N upload).
 
 Verification: `npx vitest run src/app/actions/__tests__/ingest-from-folder.test.ts` — all pass.
 Estimated: ~110–170 lines.
