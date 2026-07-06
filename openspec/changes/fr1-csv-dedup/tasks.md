@@ -59,19 +59,19 @@ Estimated: ~250–350 lines.
 ### W1 — T-7 cleanDescription determinism [production]
 Depends on: W0. Gate: scenario `Given "Glovo *Order#123" + "GLOVO   *order # 123 " → byte-identical cleaned` green.
 
-- [ ] 1.1 `src/lib/engine/__tests__/clean-description.test.ts` — RED: 4 Given/When/Then scenarios (case fold, whitespace collapse, punctuation strip, byte-identity gate).
-- [ ] 1.2 `src/lib/engine/cleanDescription.ts` — GREEN: lowercase + collapse whitespace + strip `#*` + trailing order IDs.
+- [x] 1.1 `src/lib/engine/__tests__/clean-description.test.ts` — RED: 4 Given/When/Then scenarios (case fold, whitespace collapse, punctuation strip, byte-identity gate).
+- [x] 1.2 `src/lib/engine/cleanDescription.ts` — GREEN: lowercase + collapse whitespace + strip `#*` + trailing order IDs.
 
-Verification: `npx vitest run src/lib/engine/__tests__/clean-description.test.ts` — 4/4 pass.
+Verification: `npx vitest run src/lib/engine/__tests__/clean-description.test.ts` — 7/7 pass.
 Estimated: ~80–130 lines.
 
 ### W2 — T-1 SHA-256 hash idempotency [production]
 Depends on: W0, W1. Gate: scenario `identical {date, cleanedDesc, amount} → identical id + deduped ≥ 1` green.
 
-- [ ] 2.1 `src/lib/engine/__tests__/hash.test.ts` — RED: idempotency across formats, hash stability for same input, dedup hit case.
-- [ ] 2.2 `src/lib/engine/hash.ts` — GREEN: `hashTransaction({date, cleanedDescription, amount})` using `node:crypto`.
+- [x] 2.1 `src/lib/engine/__tests__/hash.test.ts` — RED: idempotency across formats, hash stability for same input, dedup hit case.
+- [x] 2.2 `src/lib/engine/hash.ts` — GREEN: `hashTransaction({date, cleanedDescription, amount})` using `node:crypto`.
 
-Verification: `npx vitest run src/lib/engine/__tests__/hash.test.ts` — all pass.
+Verification: `npx vitest run src/lib/engine/__tests__/hash.test.ts` — 6/6 pass.
 Estimated: ~90–130 lines.
 
 ### W3 — T-3 fallback classification [production]
