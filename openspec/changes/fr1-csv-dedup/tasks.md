@@ -115,10 +115,10 @@ Estimated: ~110–170 lines.
 ### W7 — T-6 store round-trip [production]
 Depends on: W0, W2. Gate: empty → ingest 5 → 5 persisted + re-ingest → `{added:0, skipped:5}` green.
 
-- [ ] 7.1 `src/lib/types/transaction.ts` + `store.ts` + `ingest.ts` — Types: `Transaction`, `PersistedTransactions { schemaVersion:1, owners }`, `IngestResult`, `IngestLogEvent`.
-- [ ] 7.2 `src/lib/engine/__tests__/store.test.ts` — RED: empty→5→re-ingest scenarios, `firstSeenAt` preservation, missing-owner returns `[]`.
-- [ ] 7.3 `src/lib/engine/store.ts` — GREEN: `readStore` + `upsertTransactions` (idempotent, owner-scoped, hash-keyed).
-- [ ] 7.4 `src/lib/engine/logger.ts` — GREEN: append JSON-line to `${dataDir}/state/ingest.log`.
+- [x] 7.1 `src/lib/types/transaction.ts` + `store.ts` + `ingest.ts` — Types: `Transaction`, `PersistedTransactions { schemaVersion:1, owners }`, `IngestResult`, `IngestLogEvent`.
+- [x] 7.2 `src/lib/engine/__tests__/store.test.ts` — RED: empty→5→re-ingest scenarios, `firstSeenAt` preservation, missing-owner returns `[]`.
+- [x] 7.3 `src/lib/engine/store.ts` — GREEN: `readStore` + `upsertTransactions` (idempotent, owner-scoped, hash-keyed).
+- [x] 7.4 `src/lib/engine/logger.ts` — GREEN: append JSON-line to `${dataDir}/state/ingest.log`.
 
 Verification: `npx vitest run src/lib/engine/__tests__/store.test.ts` — all pass.
 Estimated: ~225–330 lines.
@@ -126,7 +126,7 @@ Estimated: ~225–330 lines.
 ### W8 — T-8 owner isolation [production]
 Depends on: W0, W7. Gate: `self` + `partner` ingest overlapping CSV → independent arrays, total 2× rowCount.
 
-- [ ] 8.1 `src/lib/engine/__tests__/owner-isolation.test.ts` — RED: separate file (1-file-per-responsibility); two owners ingest same CSV, hash collision never crosses.
+- [x] 8.1 `src/lib/engine/__tests__/owner-isolation.test.ts` — RED: separate file (1-file-per-responsibility); two owners ingest same CSV, hash collision never crosses.
 
 Verification: `npx vitest run src/lib/engine/__tests__/owner-isolation.test.ts` — all pass.
 Estimated: ~50–80 lines.
