@@ -11,6 +11,7 @@ const eslintConfig = [
       'coverage/**',
       '**/*.config.js',
       '**/*.config.cjs',
+      'next-env.d.ts',
     ],
   },
   js.configs.recommended,
