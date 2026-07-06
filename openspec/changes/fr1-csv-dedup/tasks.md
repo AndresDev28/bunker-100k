@@ -77,8 +77,8 @@ Estimated: ~90–130 lines.
 ### W3 — T-3 fallback classification [production]
 Depends on: W0. Gate: `classify(-12.50) === {tier:'wants', subcategory:'variables'}` + positive case.
 
-- [ ] 3.1 `src/lib/engine/__tests__/classify.test.ts` — RED: negative → wants.variables, positive → income.salary, zero → fallback.
-- [ ] 3.2 `src/lib/engine/classify.ts` — GREEN: sign-based stub returning `CategoryRef` (FR-2 swap boundary).
+- [x] 3.1 `src/lib/engine/__tests__/classify.test.ts` — RED: negative → wants.variables, positive → income.salary, zero → fallback.
+- [x] 3.2 `src/lib/engine/classify.ts` — GREEN: sign-based stub returning `CategoryRef` (FR-2 swap boundary).
 
 Verification: `npx vitest run src/lib/engine/__tests__/classify.test.ts` — all pass.
 Estimated: ~50–80 lines.
@@ -86,8 +86,8 @@ Estimated: ~50–80 lines.
 ### W4 — T-2 Wants isolation in computeBunkerTarget [production]
 Depends on: W0. Gate: `computeBunkerTarget(1400, 600) === 8400` AND `!== 12000`.
 
-- [ ] 4.1 `src/lib/engine/__tests__/bunker-target.test.ts` — RED: 1400+600 → 8400, wantsTotal ignored, signature pins 2nd arg.
-- [ ] 4.2 `src/lib/engine/computeBunkerTarget.ts` — GREEN: stub `return survivalMonthlyCost * 6` (FR-3 replaces body).
+- [x] 4.1 `src/lib/engine/__tests__/bunker-target.test.ts` — RED: 1400+600 → 8400, wantsTotal ignored, signature pins 2nd arg.
+- [x] 4.2 `src/lib/engine/computeBunkerTarget.ts` — GREEN: stub `return survivalMonthlyCost * 6` (FR-3 replaces body).
 
 Verification: `npx vitest run src/lib/engine/__tests__/bunker-target.test.ts` — all pass.
 Estimated: ~40–65 lines.
