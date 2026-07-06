@@ -1,0 +1,13 @@
+# FR-0 artifacts (untracked, stay out of FR-1 scope)
+.atl/
+sandbox/
+openspec/changes/fr1-csv-dedup/
+openspec/specs/
+
+# Existing docs not in scope
+spec.md
+
+# Build artifacts
+.next/
+node_modules/
+coverage/
