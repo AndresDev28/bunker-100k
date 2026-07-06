@@ -123,7 +123,7 @@ describe('ingestFromFolder', () => {
     expect(event.file).toBe('broken.csv');
   });
 
-  it('is idempotent at the action level: re-running same data produces same Transaction IDs', async () => {
+  it('is idempotent at the action level: re-running same data dedups (store-level)', async () => {
     await fs.writeFile(
       path.join(rawDir, 'dup.csv'),
       `Date,Description,Amount
@@ -134,9 +134,59 @@ describe('ingestFromFolder', () => {
     const r1 = await ingestFromFolder({ ownerId: 'self', dataDir: tmpDir });
     const r2 = await ingestFromFolder({ ownerId: 'self', dataDir: tmpDir });
 
-    // Both runs produce the same transaction count (no persistence yet — same rows processed)
+    // First run: 1 new transaction added, 0 deduped
+    expect(r1.ingested).toBe(1);
+    expect(r1.deduped).toBe(0);
+    // Second run: 0 new (all skipped as duplicates), deduped = 1
+    expect(r2.ingested).toBe(0);
+    expect(r2.deduped).toBe(1);
+    // Total persisted stays at 1 (not 2)
+    expect(r2.transactionCount).toBe(1);
     expect(r1.transactionCount).toBe(r2.transactionCount);
-    expect(r1.ingested).toBe(r2.ingested);
+  });
+
+  it('persistence + idempotency: data survives process restart and re-run is no-op', async () => {
+    // First session: ingest some data
+    await fs.writeFile(
+      path.join(rawDir, 'session1.csv'),
+      `Date,Description,Amount
+2026-03-01,A,-10
+2026-03-02,B,-20`,
+      'utf8',
+    );
+    const r1 = await ingestFromFolder({ ownerId: 'self', dataDir: tmpDir });
+    expect(r1.ingested).toBe(2);
+    expect(r1.transactionCount).toBe(2);
+
+    // Simulate "process restart" — read persisted store directly
+    const storePath = path.join(tmpDir, 'state', 'transactions.json');
+    const raw = await fs.readFile(storePath, 'utf8');
+    const parsed = JSON.parse(raw);
+    expect(parsed.schemaVersion).toBe(1);
+    expect(parsed.owners.self).toHaveLength(2);
+
+    // Second session: re-run — same data is a no-op
+    const r2 = await ingestFromFolder({ ownerId: 'self', dataDir: tmpDir });
+    expect(r2.ingested).toBe(0);
+    expect(r2.deduped).toBe(2);
+    expect(r2.transactionCount).toBe(2); // still 2, not 4
+
+    // Move session1.csv out of raw dir — only session2.csv is new
+    await fs.rename(
+      path.join(rawDir, 'session1.csv'),
+      path.join(tmpDir, 'session1.csv.bak'),
+    );
+    // New data added alongside persisted data
+    await fs.writeFile(
+      path.join(rawDir, 'session2.csv'),
+      `Date,Description,Amount
+2026-03-03,C,-30`,
+      'utf8',
+    );
+    const r3 = await ingestFromFolder({ ownerId: 'self', dataDir: tmpDir });
+    expect(r3.ingested).toBe(1); // only the new one
+    expect(r3.deduped).toBe(0); // no duplicates — session1.csv is gone
+    expect(r3.transactionCount).toBe(3); // 2 old + 1 new
   });
 
   it('processes multiple CSV files in one call', async () => {
