@@ -128,15 +128,9 @@ describe('store — T-6 round-trip', () => {
     await fs.mkdir(storeDir, { recursive: true });
     const storePath = path.join(storeDir, 'transactions.json');
     // Write a malformed store without schemaVersion
-    await fs.writeFile(
-      storePath,
-      JSON.stringify({ owners: { self: [] } }),
-      'utf8',
-    );
+    await fs.writeFile(storePath, JSON.stringify({ owners: { self: [] } }), 'utf8');
 
-    await expect(readStore(dataDir, 'self')).rejects.toThrow(
-      /schemaVersion mismatch, expected 1/,
-    );
+    await expect(readStore(dataDir, 'self')).rejects.toThrow(/schemaVersion mismatch, expected 1/);
   });
 
   it('firstSeenAt is preserved across re-ingestion (not overwritten)', async () => {

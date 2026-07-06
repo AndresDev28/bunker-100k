@@ -172,10 +172,7 @@ describe('ingestFromFolder', () => {
     expect(r2.transactionCount).toBe(2); // still 2, not 4
 
     // Move session1.csv out of raw dir — only session2.csv is new
-    await fs.rename(
-      path.join(rawDir, 'session1.csv'),
-      path.join(tmpDir, 'session1.csv.bak'),
-    );
+    await fs.rename(path.join(rawDir, 'session1.csv'), path.join(tmpDir, 'session1.csv.bak'));
     // New data added alongside persisted data
     await fs.writeFile(
       path.join(rawDir, 'session2.csv'),
