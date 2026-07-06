@@ -95,9 +95,9 @@ Estimated: ~40–65 lines.
 ### W5 — T-4 CSV parser [production]
 Depends on: W0, W1, W2. Gate: header detection + currency strip + malformed skip-and-log green.
 
-- [ ] 5.1 `src/lib/engine/__tests__/parse-csv.test.ts` — RED: standard headers (case-insensitive), currency strip (€/$/£), thousands sep, malformed skip.
-- [ ] 5.2 `src/lib/engine/parseCsv.ts` — GREEN: header detect → row parse → inject logger for skipped rows.
-- [ ] 5.3 `src/lib/engine/parseDate.ts` — GREEN: permissive DD/MM/YYYY / MM/DD/YYYY / YYYY-MM-DD → ISODate (BEFORE hash).
+- [x] 5.1 `src/lib/engine/__tests__/parse-csv.test.ts` — RED: standard headers (case-insensitive), currency strip (€/$/£), thousands sep, malformed skip.
+- [x] 5.2 `src/lib/engine/parseCsv.ts` — GREEN: header detect → row parse → inject logger for skipped rows.
+- [x] 5.3 `src/lib/engine/parseDate.ts` — GREEN: permissive DD/MM/YYYY / MM/DD/YYYY / YYYY-MM-DD → ISODate (BEFORE hash).
 
 Verification: `npx vitest run src/lib/engine/__tests__/parse-csv.test.ts` — all pass.
 Estimated: ~150–220 lines.
