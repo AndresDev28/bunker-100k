@@ -134,8 +134,8 @@ Estimated: ~50–80 lines.
 ### W9 — W-1 sandbox bridge amendment [production]
 Depends on: W0 (TS types must exist). Independent of W1–W8.
 
-- [ ] 9.1 `src/sandbox-bridge/frozenContracts.ts` — NEW: re-export `Eur`, `NeedsSubcategory`, `WantsSubcategory`, `CategoryLine`, `BunkerSummary`, `BunkerFixtures`; export NEW `AuditSplitProps` (DI labels + `sourceFiles` + `dateRange` + `transactionCount` + `ownerId`).
-- [ ] 9.2 `sandbox/src/components/AuditSplit.tsx` — MODIFY: extend props interface to match new frozen shape (additive, no breakage).
+- [x] 9.1 `src/sandbox-bridge/frozenContracts.ts` — NEW: re-export `Eur`, `NeedsSubcategory`, `WantsSubcategory`, `CategoryLine`, `BunkerSummary`, `BunkerFixtures`; export NEW `AuditSplitProps` (DI labels + `sourceFiles` + `dateRange` + `transactionCount` + `ownerId`).
+- [x] 9.2 `sandbox/src/components/AuditSplit.tsx` — MODIFY: extend props interface to match new frozen shape (additive, no breakage).
 
 Verification: `tsc --noEmit` exit 0; sandbox smoke test still passes (visual blueprint unchanged).
 Estimated: ~50–90 lines.
