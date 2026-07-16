@@ -28,9 +28,10 @@ yarn-error.log*
 # Test coverage
 coverage/
 
-# Vite (sandbox) — sandbox/src/ is now tracked (W9 re-tracking for contract compliance)
-# but node_modules/ remains local to the sandbox's own package.json
-sandbox/node_modules/
+# Vite (sandbox) — sandbox/ is blueprint-only, stays untracked. node_modules of sandbox
+# stays local to its own package.json.
+sandbox/
+sandbox/dist/
 
 # Next.js auto-generated
 next-env.d.ts
