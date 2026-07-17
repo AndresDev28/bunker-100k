@@ -44,14 +44,14 @@ W9 (type bridge) is the only W-unit that can run in parallel with W1–W8. W10 l
 ### W0 — Infra bootstrap [production]
 Gate: `npm run dev` boots Next.js on localhost:3000; `npm test` runs (0 tests ok); `tsc --noEmit` exits 0.
 
-- [ ] 0.1 `package.json` + `package-lock.json` — Next.js 15, React 19, TS, Tailwind v3, Vitest; scripts `dev`/`build`/`test`/`lint`/`typecheck`.
-- [ ] 0.2 `next.config.ts` — App Router, no experimental flags.
-- [ ] 0.3 `tsconfig.json` — `strict`, `noUncheckedIndexedAccess`, `@/*` → `./src/*`.
-- [ ] 0.4 `tailwind.config.ts` + `postcss.config.js` — content `./app/**/*.{ts,tsx}` + `./src/**/*.{ts,tsx}`.
-- [ ] 0.5 `vitest.config.ts` — `environment: 'node'`, `@/` alias.
-- [ ] 0.6 `.eslintrc.json` + `.prettierrc` — `next/core-web-vitals` + ts-checked; 2-space, single quotes, 100-col.
-- [ ] 0.7 `.gitignore` — extend existing: `node_modules/`, `.next/`, `coverage/`, `*.log`.
-- [ ] 0.8 `app/layout.tsx` + `app/page.tsx` — root layout + placeholder; UI replacement deferred to FR-2.
+- [x] 0.1 `package.json` + `package-lock.json` — Next.js 15, React 19, TS, Tailwind v3, Vitest; scripts `dev`/`build`/`test`/`lint`/`typecheck`.
+- [x] 0.2 `next.config.ts` — App Router, no experimental flags.
+- [x] 0.3 `tsconfig.json` — `strict`, `noUncheckedIndexedAccess`, `@/*` → `./src/*`.
+- [x] 0.4 `tailwind.config.ts` + `postcss.config.js` — content `./app/**/*.{ts,tsx}` + `./src/**/*.{ts,tsx}`.
+- [x] 0.5 `vitest.config.ts` — `environment: 'node'`, `@/` alias.
+- [x] 0.6 `.eslintrc.json` + `.prettierrc` — `next/core-web-vitals` + ts-checked; 2-space, single quotes, 100-col.
+- [x] 0.7 `.gitignore` — extend existing: `node_modules/`, `.next/`, `coverage/`, `*.log`.
+- [x] 0.8 `app/layout.tsx` + `app/page.tsx` — root layout + placeholder; UI replacement deferred to FR-2.
 
 Verification: `npm install && npm run dev` (port 3000 green), `npm test` (0 tests passes), `tsc --noEmit` exit 0.
 Estimated: ~250–350 lines.
@@ -134,7 +134,7 @@ Estimated: ~50–80 lines.
 ### W9 — W-1 sandbox bridge amendment [production]
 Depends on: W0 (TS types must exist). Independent of W1–W8.
 
-- [ ] 9.1 `src/sandbox-bridge/frozenContracts.ts` — NEW: re-export `Eur`, `NeedsSubcategory`, `WantsSubcategory`, `CategoryLine`, `BunkerSummary`, `BunkerFixtures`; export NEW `AuditSplitProps` (DI labels + `sourceFiles` + `dateRange` + `transactionCount` + `ownerId`).
+- [x] 9.1 `src/sandbox-bridge/frozenContracts.ts` — NEW: re-export `Eur`, `NeedsSubcategory`, `WantsSubcategory`, `CategoryLine`, `BunkerSummary`, `BunkerFixtures`; export NEW `AuditSplitProps` (DI labels + `sourceFiles` + `dateRange` + `transactionCount` + `ownerId`).
 - [ ] ~~9.2 `sandbox/src/components/AuditSplit.tsx` — MODIFY~~ **DEFERRED**: sandbox stays as FR-0 historical blueprint. W-1 closes via the production canonical contract only (9.1).
 
 Verification: `tsc --noEmit` exit 0; sandbox smoke test still passes (visual blueprint unchanged).
