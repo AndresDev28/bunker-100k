@@ -143,7 +143,7 @@ Estimated: ~50–90 lines.
 ### W10 — Docs [production]
 Depends on: W7 (data contract must exist). Gate: README explains env var, folder layout, idempotency.
 
-- [ ] 10.1 `README.md` — NEW: project intro, `BUNKER_DATA_DIR` env var, `/data/raw/*.csv` + `/data/state/transactions.json` contract, idempotency guarantee (`added:0` on re-ingest), quickstart (`npm install && npm run dev && npm test`).
+- [x] 10.1 `README.md` — NEW: project intro, `BUNKER_DATA_DIR` env var, `/data/raw/*.csv` + `/data/state/transactions.json` contract, idempotency guarantee (`added:0` on re-ingest), quickstart (`npm install && npm run dev && npm test`).
 
 Verification: README committed, no broken cross-references; `npm test` still 8/8 green.
 Estimated: ~50–100 lines.
