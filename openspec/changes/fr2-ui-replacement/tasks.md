@@ -80,15 +80,15 @@ Chain strategy: pending
 
 ## Phase 4: Read Action (W-E) — surfaces persisted transactions
 
-- [ ] E1 CREATE `src/app/actions/__tests__/load-transactions.test.ts` with 4 RED `it` blocks (#,#,#12–#14): tmpdir setup mirroring `store.test.ts`; assert persisted-read, missing-owner→`[]` no-throw, shared-helper parity, `input.dataDir` override.
-- [ ] E2 CREATE `src/app/actions/loadTransactions.ts`: `'use server'`; `loadTransactions(input?): Promise<Transaction[]>` calling `resolveDataDir()`/`resolveOwnerId()` (override via `input?`) then `readStore`. MUST NOT reimplement reads/parsing. Closes block #5.
-- [ ] E3 GREEN: `vitest run load-transactions.test.ts` passes; no `process.env.BUNKER_DATA_DIR` literal outside `env.ts` (grep gate); full `vitest run`, `tsc`, `eslint`, `prettier` green. Sandbox clean.
+- [x] E1 CREATE `src/app/actions/__tests__/load-transactions.test.ts` with 4 RED `it` blocks (#,#,#12–#14): tmpdir setup mirroring `store.test.ts`; assert persisted-read, missing-owner→`[]` no-throw, shared-helper parity, `input.dataDir` override.
+- [x] E2 CREATE `src/app/actions/loadTransactions.ts`: `'use server'`; `loadTransactions(input?): Promise<Transaction[]>` calling `resolveDataDir()`/`resolveOwnerId()` (override via `input?`) then `readStore`. MUST NOT reimplement reads/parsing. Closes block #5.
+- [x] E3 GREEN: `vitest run load-transactions.test.ts` passes; no `process.env.BUNKER_DATA_DIR` literal outside `env.ts` (grep gate); full `vitest run`, `tsc`, `eslint`, `prettier` green. Sandbox clean.
 
 ## Phase 5: Components + Render Tests (W-F)
 
-- [ ] F1 CREATE `src/components/BunkerHeader.tsx`, `BunkerHero.tsx`, `MacroGrid.tsx`, `AuditSplit.tsx`: bare functional markup (semantic HTML, NO Tailwind/dark — A5). `BunkerHero` derives `progressPercent` internally. `AuditSplit` renders `sourceFiles`/`dateRange`/`transactionCount`/`ownerId`. All visible strings from `@/lib/labels`. No `sandbox/` imports (REQ-UI-1).
-- [ ] F2 EXTEND `src/components/__tests__/components.test.ts`: add `describe('AuditSplit renders metadata')` with RED `it` #15 (metadata fields appear) + #16 (zero inline literals — every rendered string ∈ labels set). Render via `react-dom/server.renderToStaticMarkup` inside `.test.ts` (NO `vitest.config.mts` change).
-- [ ] F3 GREEN: `vitest run components.test.ts` passes; `tsc --noEmit`, `eslint .`, `prettier --check .` green. No Tailwind class strings, no `globals.css`/`dark` edits (REQ-UI-5). Sandbox clean.
+- [x] F1 CREATE `src/components/BunkerHeader.tsx`, `BunkerHero.tsx`, `MacroGrid.tsx`, `AuditSplit.tsx`: bare functional markup (semantic HTML, NO Tailwind/dark — A5). `BunkerHero` derives `progressPercent` internally. `AuditSplit` renders `sourceFiles`/`dateRange`/`transactionCount`/`ownerId`. All visible strings from `@/lib/labels`. No `sandbox/` imports (REQ-UI-1).
+- [x] F2 EXTEND `src/components/__tests__/components.test.ts`: add `describe('AuditSplit renders metadata')` with RED `it` #15 (metadata fields appear) + #16 (zero inline literals — every rendered string ∈ labels set). Render via `react-dom/server.renderToStaticMarkup` inside `.test.ts` (NO `vitest.config.mts` change).
+- [x] F3 GREEN: `vitest run components.test.ts` passes; `tsc --noEmit`, `eslint .`, `prettier --check .` green. No Tailwind class strings, no `globals.css`/`dark` edits (REQ-UI-5). Sandbox clean.
 
 ## Phase 6: Route Composition + Final Gates (W-G)
 

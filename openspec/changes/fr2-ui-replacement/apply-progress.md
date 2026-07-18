@@ -252,16 +252,142 @@ Verified: `git status sandbox/` reports clean. No sandbox/ files touched, import
 
 ---
 
+## Work Unit W-E: Read Server Action loadTransactions (COMPLETED)
+
+**Branch**: `feat/fr2-pr4-read-action-components` (stacked off `feat/fr2-pr3-aggregate`)
+**Commit**: `80b6d31` — `feat(read): implement loadTransactions Server Action with strict-TDD tests`
+**Date**: 2026-07-18
+
+### Tasks Completed
+
+- [x] E1 CREATE `src/app/actions/__tests__/load-transactions.test.ts` — 4 RED `it` blocks (#12–#14 + shared helper parity)
+- [x] E2 CREATE `src/app/actions/loadTransactions.ts` — `'use server'`, delegates to `readStore` via shared env helpers
+- [x] E3 GREEN — all gates pass
+
+### Gate Results
+
+- **vitest run**: 101/101 tests pass (97 prev + 4 new)
+- **tsc --noEmit**: PASS
+- **eslint .**: PASS
+- **prettier --check .**: PASS
+- **git status sandbox/**: CLEAN
+- **grep gate**: `process.env.BUNKER_DATA_DIR` literal only in `src/lib/engine/env.ts` (production)
+
+### Files Changed
+
+| File                                                    | Action  | Description                                                                                                   |
+| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `src/app/actions/loadTransactions.ts`                   | Created | `'use server'` read action; delegates to `readStore(resolveDataDir(), resolveOwnerId())` (REQ-READ-1..3)      |
+| `src/app/actions/__tests__/load-transactions.test.ts`   | Created | 4 strict-TDD tests: persisted read, missing owner, shared helpers, dataDir override                           |
+
+### Strict TDD Evidence
+
+| Task  | RED (test first)                                              | GREEN (impl passes) | TRIANGULATE                                              | REFACTOR             |
+| ----- | ------------------------------------------------------------- | ------------------- | -------------------------------------------------------- | -------------------- |
+| E1-E3 | `vitest run load-transactions.test.ts` failed: module missing | 4/4 pass            | 4 cases (persisted read, missing owner, env parity, override) | N/A — thin wrapper |
+
+### Work Unit Evidence
+
+| Evidence                                          | Required value                                                                                              |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Focused test command and exact result             | `npx vitest run src/app/actions/__tests__/load-transactions.test.ts` → 4/4 pass (16ms)                      |
+| Runtime harness command/scenario and exact result | N/A — thin `'use server'` wrapper over `readStore`; FS exercised via tmpdir in tests                        |
+| Rollback boundary                                 | Delete `src/app/actions/loadTransactions.ts` + `src/app/actions/__tests__/load-transactions.test.ts`        |
+
+### Design Decision
+
+- **Thin wrapper pattern**: `loadTransactions` is a thin `'use server'` wrapper that delegates entirely to `readStore`. No business logic reimplemented. Test imports the action directly — `'use server'` directive is a Next.js runtime annotation, not a Vitest barrier.
+
+### Sandbox Guard (A4)
+
+Verified: `git status sandbox/` reports clean. No sandbox/ files touched, imported, or re-tracked.
+
+---
+
+## Work Unit W-F: Production Components + Render Tests (COMPLETED)
+
+**Branch**: `feat/fr2-pr4-read-action-components`
+**Commit**: `f3306ba` — `feat(ui): add BunkerHeader/Hero/MacroGrid/AuditSplit production components`
+**Date**: 2026-07-18
+
+### Tasks Completed
+
+- [x] F1 CREATE `src/components/BunkerHeader.tsx`, `BunkerHero.tsx`, `MacroGrid.tsx`, `AuditSplit.tsx` — bare semantic HTML, no Tailwind (A5)
+- [x] F2 EXTEND `src/components/__tests__/components.test.ts` — 6 render tests via `renderToStaticMarkup`
+- [x] F3 GREEN — all gates pass including `npm run build`
+
+### Gate Results
+
+- **vitest run**: 107/107 tests pass (101 prev + 6 new render tests)
+- **tsc --noEmit**: PASS
+- **eslint .**: PASS
+- **prettier --check .**: PASS
+- **npm run build**: PASS (Next.js production build succeeds)
+- **git status sandbox/**: CLEAN
+
+### Files Changed
+
+| File                                          | Action   | Description                                                                                                          |
+| --------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `src/components/BunkerHeader.tsx`             | Created  | Renders `title` + `status` from `BunkerHeaderProps`                                                                  |
+| `src/components/BunkerHero.tsx`               | Created  | Renders `bunkerTarget`, derives `progressPercent` internally (D4), renders `microProgress` + `microSurvivalCost`     |
+| `src/components/MacroGrid.tsx`                | Created  | Renders 3 cards (label/value/trend) from `MacroGridProps`                                                            |
+| `src/components/AuditSplit.tsx`               | Created  | Renders needs/wants columns + metadata (sourceFiles, dateRange, transactionCount, ownerId) + optimizationFooter      |
+| `src/components/__tests__/components.test.ts` | Modified | Extended with 6 render tests: AuditSplit metadata, zero-inline-literals, Header, Hero, MacroGrid, zero-state render |
+
+### Strict TDD Evidence
+
+| Task  | RED (test first)                                             | GREEN (impl passes) | TRIANGULATE                                                                | REFACTOR             |
+| ----- | ------------------------------------------------------------ | ------------------- | -------------------------------------------------------------------------- | -------------------- |
+| F1-F3 | `vitest run components.test.ts` failed: module missing       | 11/11 pass (5 W-A + 6 W-F) | 6 render cases (metadata, zero-literals, header, hero, macro, zero-state) | N/A — presentational |
+
+### Work Unit Evidence
+
+| Evidence                                          | Required value                                                                                              |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Focused test command and exact result             | `npx vitest run src/components/__tests__/components.test.ts` → 11/11 pass (19ms)                            |
+| Runtime harness command/scenario and exact result | `renderToStaticMarkup(<AuditSplit {...}/>)` → HTML string contains all expected labels and metadata         |
+| Rollback boundary                                 | Delete `src/components/{BunkerHeader,BunkerHero,MacroGrid,AuditSplit}.tsx`; drop render describes from test |
+
+### Design Decisions
+
+- **React import**: Components import `React` explicitly (`import React, { type ReactNode } from 'react'`) because `tsconfig.json` has `"jsx": "preserve"` and Vitest/esbuild needs the React global for JSX transformation in `.tsx` files.
+- **Zero-state render**: Empty `BunkerFixtures` (from `buildBunkerViewModel([])`) renders all 4 components without NaN/undefined leaks. All 4 needs + 3 wants labels still appear (zero amounts).
+- **Metadata rendering**: AuditSplit renders sourceFiles, dateRange, transactionCount, ownerId in a `<thead>` row — all from props, no inline literals.
+
+### Sandbox Guard (A4)
+
+Verified: `git status sandbox/` reports clean. No sandbox/ files touched, imported, or re-tracked.
+
+---
+
+## Git Diff Summary
+
+### PR4 branch diff vs PR3 tip (W-E + W-F only):
+
+```
+ src/app/actions/__tests__/load-transactions.test.ts | 105 ++++++++++
+ src/app/actions/loadTransactions.ts                 |  22 ++
+ src/components/AuditSplit.tsx                       |  70 +++++++
+ src/components/BunkerHeader.tsx                     |  18 ++
+ src/components/BunkerHero.tsx                       |  33 +++
+ src/components/MacroGrid.tsx                        |  28 +++
+ src/components/__tests__/components.test.ts         | 221 +++++++++++++++++++++
+ 7 files changed, 497 insertions(+)
+```
+
+---
+
 ## Cumulative Status
 
 - **W-A**: ✅ COMPLETE (PR1 — branch `feat/fr2-w-a-refreeze-pin`)
 - **W-B**: ✅ COMPLETE (PR2 — branch `feat/fr2-pr2-env-labels`)
 - **W-C**: ✅ COMPLETE (PR2 — branch `feat/fr2-pr2-env-labels`)
 - **W-D**: ✅ COMPLETE (PR3 — branch `feat/fr2-pr3-aggregate`)
-- **W-E**: 🔲 PENDING (PR4)
-- **W-F**: 🔲 PENDING (PR4)
+- **W-E**: ✅ COMPLETE (PR4 — branch `feat/fr2-pr4-read-action-components`)
+- **W-F**: ✅ COMPLETE (PR4 — branch `feat/fr2-pr4-read-action-components`)
 - **W-G**: 🔲 PENDING (PR5)
 
-**Progress**: 4/7 work units complete (57%)
+**Progress**: 6/7 work units complete (86%)
 
-**Next**: PR4 = W-E (read action `loadTransactions`) + W-F (4 components + render tests)
+**Next**: PR5 = W-G (`app/page.tsx` async Server Component route wiring + final gates)
