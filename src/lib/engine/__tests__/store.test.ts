@@ -35,16 +35,54 @@ describe('store — T-6 round-trip', () => {
     expect(result).toEqual([]);
   });
 
-  it('readStore on empty dir (file auto-created with schemaVersion: 1) → returns []', async () => {
-    // Trigger auto-creation by reading
-    await readStore(dataDir, 'self');
-    // Now verify the file exists with correct schema
+  it('readStore on missing dir/file → returns [] without creating anything', async () => {
+    // dataDir was removed in beforeEach — neither dir nor file exists.
+    const result = await readStore(dataDir, 'self');
+    expect(result).toEqual([]);
+
+    // readStore must NOT have created the state dir or the store file.
+    const stateDir = path.join(dataDir, 'state');
+    const storePath = path.join(stateDir, 'transactions.json');
+    await expect(fs.access(stateDir)).rejects.toThrow();
+    await expect(fs.access(storePath)).rejects.toThrow();
+  });
+
+  it('readStore on missing parent dir → returns [] without throwing (regression: EACCES on /data)', async () => {
+    // Use a deeply nested path where no ancestor exists — simulates the
+    // original bug where readStore tried to mkdir on an unwritable parent.
+    const missingParent = path.join(
+      os.tmpdir(),
+      'bkr-test-store-missing-parent',
+      String(Date.now()),
+      'nested',
+    );
+    // Sanity: nothing at this path yet.
+    await expect(fs.access(missingParent)).rejects.toThrow();
+
+    const result = await readStore(missingParent, 'self');
+    expect(result).toEqual([]);
+
+    // Still nothing created.
+    await expect(fs.access(missingParent)).rejects.toThrow();
+  });
+
+  it('upsertTransactions still auto-creates dir/file on first write', async () => {
+    // dataDir was removed in beforeEach.
+    const txns = fiveSelfTransactions('/data/raw/march.csv');
+    const { added, skipped } = await upsertTransactions(dataDir, 'self', txns);
+    expect(added).toBe(5);
+    expect(skipped).toBe(0);
+
+    // The state dir and file must now exist.
     const storePath = path.join(dataDir, 'state', 'transactions.json');
     const raw = await fs.readFile(storePath, 'utf8');
     const parsed = JSON.parse(raw);
     expect(parsed.schemaVersion).toBe(1);
-    const result = await readStore(dataDir, 'self');
-    expect(result).toEqual([]);
+    expect(parsed.owners.self).toHaveLength(5);
+
+    // And readStore now returns the inserted transactions.
+    const stored = await readStore(dataDir, 'self');
+    expect(stored).toHaveLength(5);
   });
 
   it('insert 5 transactions → readStore returns 5', async () => {

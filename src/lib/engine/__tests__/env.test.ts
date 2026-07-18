@@ -6,6 +6,7 @@
  * process.env.BUNKER_DATA_DIR outside this module.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as path from 'node:path';
 import { resolveDataDir, resolveOwnerId } from '../env';
 
 describe('env helpers', () => {
@@ -23,8 +24,8 @@ describe('env helpers', () => {
     }
   });
 
-  it('resolveDataDir defaults to /data when BUNKER_DATA_DIR unset', () => {
-    expect(resolveDataDir()).toBe('/data');
+  it('resolveDataDir defaults to project-local ./data when BUNKER_DATA_DIR unset', () => {
+    expect(resolveDataDir()).toBe(path.join(process.cwd(), 'data'));
   });
 
   it('resolveDataDir returns env override when BUNKER_DATA_DIR is set', () => {
