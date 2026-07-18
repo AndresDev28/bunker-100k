@@ -42,12 +42,27 @@ async function withStoreLock<T>(dataDir: string, fn: () => Promise<T>): Promise<
 
 /**
  * Read all transactions for a given owner from the persisted store.
- * Auto-creates the store file with schemaVersion:1 if it doesn't exist.
- * Returns [] for an ownerId that has never been written (no throw).
+ *
+ * READ-ONLY: does NOT create the state directory or the store file.
+ * If the store file is missing (never written) or its parent directory is
+ * missing, returns [] gracefully. Other errors (EACCES on read, JSON parse
+ * errors, schemaVersion mismatch) still propagate.
+ *
+ * This preserves the "no throw on empty store" contract without violating
+ * read semantics (no fs.mkdir on a read path). See hotfix/fr1.
  */
 export async function readStore(dataDir: string, ownerId: string): Promise<Transaction[]> {
-  await ensureStoreShape(dataDir);
-  const raw = await fs.readFile(path.join(dataDir, 'state', STORE_FILENAME), 'utf8');
+  const storePath = path.join(dataDir, 'state', STORE_FILENAME);
+  let raw: string;
+  try {
+    raw = await fs.readFile(storePath, 'utf8');
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      // Store has never been written — graceful empty state.
+      return [];
+    }
+    throw err;
+  }
   const parsed = JSON.parse(raw) as PersistedTransactions;
   if (parsed.schemaVersion !== STORE_SCHEMA_VERSION) {
     throw new Error(
