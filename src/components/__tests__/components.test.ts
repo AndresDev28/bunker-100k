@@ -6,7 +6,7 @@
  * work units EXTEND (append) — never overwrite.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type {
   BunkerHeaderProps,
   BunkerHeroProps,
@@ -342,5 +342,98 @@ describe('Zero-state render (empty store)', () => {
     for (const label of Object.values(WANTS_LABELS)) {
       expect(auditHtml).toContain(label);
     }
+  });
+});
+
+// ── W-G: Page zero-state + degenerate render (strict-TDD) ─────────────────
+//
+// app/page.tsx is an async Server Component that calls loadTransactions (a
+// 'use server' action). We mock loadTransactions via vi.mock (hoisted) and
+// import Page dynamically. The 'use server' directive is a Next.js runtime
+// annotation — in Vitest (Node) it's inert, so mocking works transparently.
+
+vi.mock('@/app/actions/loadTransactions', () => ({
+  loadTransactions: vi.fn(),
+}));
+
+describe('app/page.tsx zero-state', () => {
+  it('renders all four components without throwing against an empty store', async () => {
+    const { loadTransactions } = await import('@/app/actions/loadTransactions');
+    vi.mocked(loadTransactions).mockResolvedValueOnce([]);
+
+    const { default: Page } = await import('../../../app/page');
+    const html = renderToStaticMarkup(await Page());
+
+    // All four component markers present
+    expect(html).toContain(HERO_TITLE);
+    expect(html).toContain(NEEDS_SECTION_TITLE);
+    expect(html).toContain(WANTS_SECTION_TITLE);
+    expect(html).toContain(LABEL_INCOME);
+    expect(html).toContain(LABEL_WANTS);
+    expect(html).toContain(LABEL_SAVE_RATE);
+
+    // Zero-state sentinel (D8)
+    expect(html).toContain('1970-01-01');
+
+    // transactionCount=0
+    expect(html).toContain('0');
+
+    // No NaN or undefined leaks
+    expect(html).not.toContain('NaN');
+    expect(html).not.toContain('undefined');
+
+    // All 4 needs + 3 wants labels still render (zero amounts)
+    for (const label of Object.values(NEEDS_LABELS)) {
+      expect(html).toContain(label);
+    }
+    for (const label of Object.values(WANTS_LABELS)) {
+      expect(html).toContain(label);
+    }
+  });
+
+  it('renders with non-empty data (degenerate shape: one salary + one variables)', async () => {
+    const { loadTransactions } = await import('@/app/actions/loadTransactions');
+    const txns: Transaction[] = [
+      {
+        id: 'tx-salary',
+        date: '2026-01-10' as ISODate,
+        description: 'Salary',
+        cleanedDescription: 'salary',
+        amount: 3000,
+        category: { tier: 'income', subcategory: 'salary' },
+        ownerId: 'self',
+        firstSeenAt: '2026-01-10T00:00:00.000Z',
+        sourceFile: '/data/csv/jan.csv',
+      },
+      {
+        id: 'tx-vars',
+        date: '2026-01-15' as ISODate,
+        description: 'Variable expense',
+        cleanedDescription: 'variable',
+        amount: -50,
+        category: { tier: 'wants', subcategory: 'variables' },
+        ownerId: 'self',
+        firstSeenAt: '2026-01-15T00:00:00.000Z',
+        sourceFile: '/data/csv/jan.csv',
+      },
+    ];
+    vi.mocked(loadTransactions).mockResolvedValueOnce(txns);
+
+    const { default: Page } = await import('../../../app/page');
+    const html = renderToStaticMarkup(await Page());
+
+    // Categorized rows appear
+    expect(html).toContain(NEEDS_LABELS.housing);
+    expect(html).toContain(WANTS_LABELS.variables);
+    expect(html).toContain('50'); // |amount| of variables tx
+
+    // Metadata
+    expect(html).toContain('/data/csv/jan.csv');
+    expect(html).toContain('2'); // transactionCount
+    expect(html).toContain('self');
+
+    // Date range from transactions
+    expect(html).toContain('2026-01-10');
+    expect(html).toContain('2026-01-15');
   });
 });
