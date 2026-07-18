@@ -14,18 +14,9 @@ import type { ISODate } from '../lib/engine/parseDate';
 
 // ── Base domain types re-exported from sandbox fixtures ──────────────────────
 
-export type NeedsSubcategory =
-  | 'food'
-  | 'transport'
-  | 'housing'
-  | 'utilities'
-  | 'health'
-  | 'education'
-  | 'subscriptions'
-  | 'other_needs';
+export type NeedsSubcategory = 'housing' | 'groceries' | 'utilities' | 'liabilities';
 
-export type WantsSubcategory =
-  'restoration' | 'entertainment' | 'shopping' | 'subscriptions' | 'travel' | 'other_wants';
+export type WantsSubcategory = 'restoration' | 'subscriptions' | 'variables';
 
 export type Eur = number;
 
@@ -43,10 +34,22 @@ export interface BunkerSummary {
   monthsRemaining: number;
 }
 
-// BunkerFixtures stub — full component props deferred to FR-2 UI work
-export type BunkerHeaderProps = Record<string, never>;
-export type BunkerHeroProps = Record<string, never>;
-export type MacroGridProps = Record<string, never>;
+// FR-2 re-freeze: component props trimmed to spec §2 + A7
+export interface BunkerHeaderProps {
+  title: string;
+  status: string;
+}
+
+export interface BunkerHeroProps {
+  bunkerTarget: Eur;
+  currentCash: Eur;
+  monthsRemaining: number;
+  survivalMonthlyCost: Eur;
+}
+
+export interface MacroGridProps {
+  cards: readonly { label: string; value: number | string; trend: string }[];
+}
 
 export interface BunkerFixtures {
   header: BunkerHeaderProps;
