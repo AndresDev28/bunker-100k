@@ -12,11 +12,11 @@
 | Chained PRs recommended            | Yes (design pre-staged W-A..W-G slice points; total ≫ 400)              |
 | Suggested split                    | PR1 W-A → PR2 W-B+W-C → PR3 W-D → PR4 W-E+W-F → PR5 W-G                 |
 | Delivery strategy                  | ask-on-risk                                                             |
-| Chain strategy                     | pending (orchestrator resolves stacked-to-main vs feature-branch-chain) |
+| Chain strategy                     | stacked-to-main (resolved by orchestrator)                              |
 
-Decision needed before apply: Yes
+Decision needed before apply: Yes (resolved: chained PRs, stacked-to-main)
 Chained PRs recommended: Yes
-Chain strategy: pending
+Chain strategy: stacked-to-main
 400-line budget risk: High
 
 ### Suggested Work Units
@@ -92,9 +92,9 @@ Chain strategy: pending
 
 ## Phase 6: Route Composition + Final Gates (W-G)
 
-- [ ] G1 EXTEND `src/components/__tests__/components.test.ts`: add `describe('app/page.tsx zero-state')` RED `it` #17 — render `app/page.tsx` (mock `loadTransactions`→`[]`) without throwing, all four component markers present.
-- [ ] G2 MODIFY `app/page.tsx`: async Server Component; `const txns=await loadTransactions()`; `const fixtures=buildBunkerViewModel(txns)`; render `<BunkerHeader>` `<BunkerHero>` `<MacroGrid>` `<AuditSplit>` with fields from `fixtures`. `app/layout.tsx` UNTOUCHED.
-- [ ] G3 GREEN: `vitest run && tsc --noEmit && eslint . && prettier --check . && npm run build` all green. `git status sandbox/` clean (A4). `git diff app/layout.tsx` empty (A5).
+- [x] G1 EXTEND `src/components/__tests__/components.test.ts`: add `describe('app/page.tsx zero-state')` RED `it` #17 — render `app/page.tsx` (mock `loadTransactions`→`[]`) without throwing, all four component markers present.
+- [x] G2 MODIFY `app/page.tsx`: async Server Component; `const txns=await loadTransactions()`; `const fixtures=buildBunkerViewModel(txns)`; render `<BunkerHeader>` `<BunkerHero>` `<MacroGrid>` `<AuditSplit>` with fields from `fixtures`. `app/layout.tsx` UNTOUCHED.
+- [x] G3 GREEN: `vitest run && tsc --noEmit && eslint . && prettier --check . && npm run build` all green. `git status sandbox/` clean (A4). `git diff app/layout.tsx` empty (A5).
 
 ## Threat Matrix
 

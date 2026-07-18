@@ -378,6 +378,107 @@ Verified: `git status sandbox/` reports clean. No sandbox/ files touched, import
 
 ---
 
+## Work Unit W-G: Route Composition + Final Gates (COMPLETED)
+
+**Branch**: `feat/fr2-pr5-route` (stacked off `feat/fr2-pr4-read-action-components`)
+**Commit**: `53f798a` — `feat(route): wire app/page.tsx async SC + zero-state/degenerate render tests`
+**Date**: 2026-07-18
+
+### Tasks Completed
+
+- [x] G1 EXTEND `src/components/__tests__/components.test.ts` — `describe('app/page.tsx zero-state')` with 2 `it` blocks (#17 zero-state + degenerate render)
+- [x] G2 MODIFY `app/page.tsx` — async Server Component; `await loadTransactions()` → `buildBunkerViewModel(txns)` → render 4 components. `app/layout.tsx` UNTOUCHED.
+- [x] G3 GREEN — all gates pass including `npm run build`
+
+### Gate Results
+
+- **vitest run**: 109/109 tests pass (107 prev + 2 new page tests)
+- **tsc --noEmit**: PASS
+- **eslint .**: PASS
+- **prettier --check .**: PASS (source files clean)
+- **npm run build**: PASS — route rendered as `ƒ (Dynamic)` via `export const dynamic = 'force-dynamic'`
+- **git status sandbox/**: CLEAN
+- **git diff app/layout.tsx**: EMPTY (untouched per A5)
+
+### Files Changed
+
+| File                                          | Action   | Description                                                                                                         |
+| --------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `app/page.tsx`                                | Modified | Replaced FR-1 placeholder with async SC: `loadTransactions` → `buildBunkerViewModel` → 4 components. `dynamic = 'force-dynamic'`. |
+| `src/components/__tests__/components.test.ts` | Modified | Extended with `describe('app/page.tsx zero-state')`: zero-state render + degenerate render (one salary + one variables) |
+
+### Strict TDD Evidence
+
+| Task  | RED (test first)                                                                        | GREEN (impl passes) | TRIANGULATE                                                              | REFACTOR             |
+| ----- | --------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------ | -------------------- |
+| G1-G3 | 2/2 fail: `React is not defined` (page.tsx had no React import, was FR-1 placeholder)  | 13/13 pass (11 prev + 2 new) | 2 cases (zero-state empty store, degenerate non-empty with salary+variables) | N/A — route wiring |
+
+### Work Unit Evidence
+
+| Evidence                                          | Required value                                                                                                   |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Focused test command and exact result             | `npx vitest run src/components/__tests__/components.test.ts` → 13/13 pass (30ms)                                 |
+| Runtime harness command/scenario and exact result | `renderToStaticMarkup(await Page())` with `vi.mock('@/app/actions/loadTransactions')` → HTML contains all markers |
+| Rollback boundary                                 | Restore `app/page.tsx` FR-1 placeholder; drop `describe('app/page.tsx zero-state')` from test                    |
+
+### Design Decisions
+
+- **Mock pattern**: `vi.mock('@/app/actions/loadTransactions', () => ({ loadTransactions: vi.fn() }))` at file level (hoisted). Each test configures with `mockResolvedValueOnce`. The `'use server'` directive is a Next.js runtime annotation — in Vitest (Node) it's inert, so mocking works transparently. No helper extraction needed.
+- **`export const dynamic = 'force-dynamic'`**: Required because `loadTransactions` reads from the filesystem (`/data`). Without this, `next build` attempts to prerender the page at build time and fails with `EACCES: permission denied, mkdir '/data'`. The route is server-rendered on demand (`ƒ` in build output).
+- **React import**: `import React from 'react'` required because `tsconfig.json` has `"jsx": "preserve"` and Vitest/esbuild needs the React global for JSX transformation.
+- **Zero-state guarantee**: When `loadTransactions()` returns `[]`, `buildBunkerViewModel([])` produces a valid zero-state `BunkerFixtures` — all 4 components render without throwing, no NaN/undefined leaks.
+- **Un-styled (A5)**: Route uses bare `<main>` wrapper. No Tailwind classes, no `globals.css` import, no `dark` class.
+
+### Sandbox Guard (A4)
+
+Verified: `git status sandbox/` reports clean. No sandbox/ files touched, imported, or re-tracked.
+
+### Zero-State UI Verification
+
+**User acceptance**: On branch `feat/fr2-pr5-route`, running `npm run dev` and navigating to `http://localhost:3000` shows the FR-2 zero-state UI:
+- BunkerHeader with title "BUNKER TARGET (6-MONTH EMERGENCY FUND)"
+- BunkerHero with `0 €` target, `0%` progress, `0.0 months remaining`
+- MacroGrid with 3 cards (Income Medios `0`, Wants / Superfluous `0`, Save Rate `0`)
+- AuditSplit with 4 needs + 3 wants columns (all `0 €`), metadata showing `1970-01-01` dateRange sentinel, `0` transactions, `self` ownerId
+
+No crash, no NaN, no undefined. The store is empty (`/data` does not exist), so `loadTransactions()` returns `[]` → zero-state renders cleanly.
+
+---
+
+## Git Diff Summary
+
+### PR5 branch diff vs PR4 tip (W-G only):
+
+```
+ app/page.tsx                                | 35 +++++++++++++++++++++++++++++++----
+ src/components/__tests__/components.test.ts | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 127 insertions(+), 3 deletions(-)
+```
+
+### PR5 branch diff vs main (cumulative W-A..W-G):
+
+```
+ app/page.tsx                                        |  35 ++--
+ src/app/actions/__tests__/load-transactions.test.ts | 105 ++++++++++++
+ src/app/actions/ingestFromFolder.ts                 |   5 +-
+ src/app/actions/loadTransactions.ts                 |  22 +++
+ src/components/AuditSplit.tsx                       |  70 ++++++++
+ src/components/BunkerHeader.tsx                     |  18 ++
+ src/components/BunkerHero.tsx                       |  33 ++++
+ src/components/MacroGrid.tsx                        |  28 ++++
+ src/components/__tests__/components.test.ts         | 436 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/lib/__tests__/labels.test.ts                    |  56 +++++++
+ src/lib/engine/__tests__/buildBunkerViewModel.test.ts | 301 ++++++++++++++++++++++++++++++++++
+ src/lib/engine/__tests__/env.test.ts                |  38 +++++
+ src/lib/engine/buildBunkerViewModel.ts              | 217 ++++++++++++++++++++++++
+ src/lib/engine/env.ts                               |  16 ++
+ src/lib/labels.ts                                   |  55 +++++++
+ src/sandbox-bridge/frozenContracts.ts               |  33 ++--
+ 16 files changed, 1453 insertions(+), 20 deletions(-)
+```
+
+---
+
 ## Cumulative Status
 
 - **W-A**: ✅ COMPLETE (PR1 — branch `feat/fr2-w-a-refreeze-pin`)
@@ -386,8 +487,10 @@ Verified: `git status sandbox/` reports clean. No sandbox/ files touched, import
 - **W-D**: ✅ COMPLETE (PR3 — branch `feat/fr2-pr3-aggregate`)
 - **W-E**: ✅ COMPLETE (PR4 — branch `feat/fr2-pr4-read-action-components`)
 - **W-F**: ✅ COMPLETE (PR4 — branch `feat/fr2-pr4-read-action-components`)
-- **W-G**: 🔲 PENDING (PR5)
+- **W-G**: ✅ COMPLETE (PR5 — branch `feat/fr2-pr5-route`)
 
-**Progress**: 6/7 work units complete (86%)
+**Progress**: 7/7 work units complete (100%)
 
-**Next**: PR5 = W-G (`app/page.tsx` async Server Component route wiring + final gates)
+**FR-2 implementation END of chained apply. All 5 PRs opened/stacked.**
+
+**Next**: `sdd-verify` for FR-2 whole — verify all specs, design, tasks satisfied across all 7 work units.
