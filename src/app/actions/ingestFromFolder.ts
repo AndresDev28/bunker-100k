@@ -17,14 +17,15 @@ import { parseCsv } from '@/lib/engine/parseCsv';
 import { ingestTransactions } from '@/lib/engine/ingestTransactions';
 import { readStore, upsertTransactions } from '@/lib/engine/store';
 import { appendIngestLog } from '@/lib/engine/logger';
+import { resolveDataDir, resolveOwnerId } from '@/lib/engine/env';
 import type { IngestResult } from '@/lib/types/ingest';
 
 export async function ingestFromFolder(input?: {
   ownerId?: string;
   dataDir?: string;
 }): Promise<IngestResult> {
-  const ownerId = input?.ownerId ?? 'self';
-  const dataDir = input?.dataDir ?? process.env.BUNKER_DATA_DIR ?? '/data';
+  const ownerId = input?.ownerId ?? resolveOwnerId();
+  const dataDir = input?.dataDir ?? resolveDataDir();
   const rawDir = path.join(dataDir, 'raw');
   const stateDir = path.join(dataDir, 'state');
   const logPath = path.join(stateDir, 'ingest.log');

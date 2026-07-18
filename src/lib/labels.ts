@@ -1,0 +1,55 @@
+/**
+ * Production UI constants — ported from sandbox/src/labels.ts.
+ *
+ * REQ-UI-1/2: all visible strings in components MUST come from this module.
+ * Zero inline JSX string literals. Typed against re-frozen unions from
+ * sandbox-bridge/frozenContracts.ts.
+ *
+ * A4: sandbox/ untouched — this is a faithful port, not an import.
+ */
+import type { NeedsSubcategory, WantsSubcategory } from '@/sandbox-bridge/frozenContracts';
+
+// Hero
+export const HERO_TITLE = 'BUNKER TARGET (6-MONTH EMERGENCY FUND)';
+
+// Section titles
+export const NEEDS_SECTION_TITLE = 'Needs Breakdown';
+export const WANTS_SECTION_TITLE = 'Optimization Zone (Wants)';
+
+// MacroGrid card labels
+export const LABEL_INCOME = 'Income Medios';
+export const LABEL_WANTS = 'Wants / Superfluous';
+export const LABEL_SAVE_RATE = 'Save Rate';
+
+// MacroGrid card trends (view strings — no orphan literals in JSX)
+export const TREND_INCOME = '↗ stable';
+export const TREND_WANTS = '↘ review';
+export const TREND_SAVE_RATE = '— baseline';
+
+// Semantic done-gate labels
+export const LABEL_BUNKER_TARGET = 'Bunker Target';
+export const LABEL_SAVE_RATE_GATE = 'Save Rate';
+
+// Subcategory display maps
+export const NEEDS_LABELS: Record<NeedsSubcategory, string> = {
+  housing: 'Housing',
+  groceries: 'Groceries',
+  utilities: 'Utilities',
+  liabilities: 'Liabilities',
+};
+
+export const WANTS_LABELS: Record<WantsSubcategory, string> = {
+  restoration: 'Restoration',
+  subscriptions: 'Subscriptions',
+  variables: 'Variables',
+};
+
+// Micro-metadata templates
+export const microProgress = (pct: number, months: number): string =>
+  `[${pct.toFixed(0)}%] | ${months.toFixed(1)} months remaining to safety`;
+
+export const microSurvivalCost = (cost: number): string =>
+  `*Survival Monthly Cost: ${cost.toLocaleString()} €/mo`;
+
+export const optimizationFooter = (amount: number): string =>
+  `*Optimization potential: +${amount.toLocaleString()} €/mo`;
