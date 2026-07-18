@@ -110,3 +110,7 @@ None. A1–A7, A3/C2/G1/F1-trimmed, and `dateRange` sentinel all resolved.
 ## Risk Note (tasks phase)
 
 400-line budget = **HIGH**. Forecast: `Decision needed before apply: Yes`, `Chained PRs recommended: Yes`, `400-line budget risk: High`. W-A through W-G are natural chained-PR slice points.
+
+### D11. Server Component Async Boundary (Added Post-Verify)
+`export const dynamic = 'force-dynamic'` en `app/page.tsx`.
+**Razón:** `readStore` lee el filesystem en runtime; React Server Components están cacheados por defecto. Necesitamos que la página se regenere en cada request durante desarrollo.
