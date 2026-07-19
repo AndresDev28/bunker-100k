@@ -10,9 +10,9 @@ import type { BunkerHeaderProps } from '@/sandbox-bridge/frozenContracts';
 
 export function BunkerHeader({ title, status }: BunkerHeaderProps): ReactNode {
   return (
-    <header>
-      <h3>{title}</h3>
-      <span>{status}</span>
+    <header className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+      <h3 className="text-fuchsia-500 font-semibold tracking-wide">{title}</h3>
+      <span className="text-zinc-400 text-sm">{status}</span>
     </header>
   );
 }

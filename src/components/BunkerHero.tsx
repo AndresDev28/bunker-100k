@@ -18,15 +18,19 @@ export function BunkerHero(props: BunkerHeroProps): ReactNode {
 
   return (
     <section>
-      <h1>{bunkerTarget.toLocaleString()} €</h1>
-      <div>
-        <div style={{ width: `${progressPercent}%` }} />
+      <h1 className="font-mono tabular-nums text-zinc-100 text-4xl sm:text-5xl font-semibold">
+        {bunkerTarget.toLocaleString()} €
+      </h1>
+      <div className="h-2 bg-zinc-800 rounded">
+        <div className="h-2 bg-fuchsia-500 rounded" style={{ width: `${progressPercent}%` }} />
       </div>
       <p>
-        <small>{microProgress(progressPercent, monthsRemaining)}</small>
+        <small className="text-zinc-400 text-sm">
+          {microProgress(progressPercent, monthsRemaining)}
+        </small>
       </p>
       <p>
-        <span>{microSurvivalCost(survivalMonthlyCost)}</span>
+        <span className="text-zinc-400 text-sm">{microSurvivalCost(survivalMonthlyCost)}</span>
       </p>
     </section>
   );
