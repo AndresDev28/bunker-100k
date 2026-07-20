@@ -75,7 +75,7 @@ export function AuditSplit({
       <tfoot>
         <tr>
           <td colSpan={2}>
-            <small className="text-zinc-500 text-xs">
+            <small className="text-zinc-400 text-xs">
               {optimizationFooter(optimizationPotential)}
             </small>
           </td>

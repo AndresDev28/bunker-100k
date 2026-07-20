@@ -29,7 +29,7 @@ export function MacroGrid({ cards }: MacroGridProps): ReactNode {
             >
               {card.value}
             </div>
-            <small className="text-zinc-500 text-xs">{card.trend}</small>
+            <small className="text-zinc-400 text-xs">{card.trend}</small>
           </div>
         );
       })}
