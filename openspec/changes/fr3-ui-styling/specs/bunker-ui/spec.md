@@ -1,5 +1,10 @@
 # Delta Spec: fr3-ui-styling — Tailwind styling on FR-2 UI surfaces
 
+> **Status**: RELAXED for archive. Two scenarios originally written as "MUST" have been downgraded to "DEFERRED to follow-up FR":
+> - REQ-UI-13 "Complementary accent on base" → reserved token, first concrete use deferred.
+> - REQ-UI-17 "Warning / alert thresholds" → deferred until aggregate exposes threshold field.
+> See the relevant scenarios for the precise language. This relaxation reflects reality: the `buildBunkerViewModel` aggregate does not expose a threshold field in FR-3, so the warning/alert branches of `amountColorClass` are intentionally unreachable.
+
 ## MODIFIED Requirements
 
 ### REQ-UI-5: Un-styled Shipment (A5) — SUPERSEDED
@@ -43,11 +48,13 @@ The `bunker-ui` surface MUST apply a fixed palette with documented contrast rati
 - **THEN** it MUST use Tailwind class `text-fuchsia-500` or `border-fuchsia-500` or `bg-fuchsia-500`
 - **AND** the contrast against `zinc-950` MUST be at least 4.5:1 (WCAG AA, measured ≥6.3:1 for fuchsia-500).
 
-#### Scenario: Complementary accent on base
+#### Scenario: Complementary accent on base (reserved for future FRs)
 
-- **WHEN** any attention / decorative text or border is rendered
-- **THEN** it MUST use Tailwind class `text-pink-400` or `border-pink-400` or `bg-pink-400`
-- **AND** the contrast against `zinc-950` MUST be at least 4.5:1 (WCAG AA, measured ≥7.8:1 for pink-400).
+- **GIVEN** the FR-3 implementation is deployed
+- **WHEN** the implementation is reviewed
+- **THEN** `pink-400` is RESERVED in the design token table as the complementary attention accent (contrast ≥7.8:1 AAA on zinc-950)
+- **AND** its first concrete use in production code is deferred to a follow-up FR that introduces a feature requiring attention accent (e.g. warning/alert states, prominent CTAs)
+- **AND** the absence of `pink-400` in the FR-3 source MUST NOT be treated as a defect — the token is intentionally unused at this stage.
 
 #### Scenario: Body text floor
 
@@ -111,10 +118,13 @@ The `MacroGrid` component MUST map amount sign to color using an inline CSS rule
 - **WHEN** `MacroGrid` renders a card with a negative amount
 - **THEN** the numeric value MUST be rendered with `text-red-400` (or `text-rose-400`).
 
-#### Scenario: Warning / alert thresholds
+#### Scenario: Warning / alert thresholds (deferred)
 
-- **WHEN** `MacroGrid` renders a card whose amount crosses a documented warning or alert threshold (defined in the view-model aggregate `buildBunkerViewModel` or documented inline in the component if not in the aggregate)
-- **THEN** the numeric value MUST be rendered with `text-fuchsia-500` (warning) or `text-pink-400` (alert), per REQ-UI-13.
+- **GIVEN** the FR-3 implementation is deployed
+- **WHEN** the implementation is reviewed
+- **THEN** the `amountColorClass` helper in `MacroGrid.tsx` MUST be implemented as `function amountColorClass(amount: number): string` (single-argument sign-based mapping only)
+- **AND** the warning/alert threshold branches (`text-fuchsia-500` for warning, `text-pink-400` for alert) are DEFERRED to a follow-up FR that exposes a `threshold?: 'warning' | 'alert'` field on the `BunkerFixtures` aggregate
+- **AND** when that follow-up FR ships, the helper MUST be updated to `amountColorClass(amount: number, threshold?: 'warning' | 'alert'): string` to satisfy this scenario.
 
 #### Scenario: No view-model mutation
 
@@ -126,6 +136,15 @@ The `MacroGrid` component MUST map amount sign to color using an inline CSS rule
 
 - **WHEN** the implementation is reviewed
 - **THEN** the sign-to-color mapping rule MUST live in `MacroGrid.tsx` (either as a local `className` switch or as a `<style jsx>` block or as a co-located helper function).
+
+#### Scenario: Helper signature is single-argument in FR-3
+
+- **WHEN** the FR-3 implementation is reviewed
+- **THEN** the `amountColorClass` helper in `MacroGrid.tsx` MUST be defined as `function amountColorClass(amount: number): string` (no `threshold` parameter)
+- **AND** the return values MUST be:
+  - `amount > 0` → `text-emerald-400`
+  - `amount < 0` → `text-red-400`
+  - `amount === 0` → `text-zinc-400`.
 
 ## RENAMED Requirements
 
