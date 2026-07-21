@@ -57,6 +57,13 @@ export interface BunkerFixtures {
   macroGrid: MacroGridProps;
   auditSplit: AuditSplitProps;
   summary: BunkerSummary;
+  /**
+   * FR-4 (REQ-AGG-6) — derived threshold band.
+   * Pure function of `(currentCash, bunkerTarget)`; absent when the predicate
+   * returns undefined (healthy or zero-state). T8 reversal: this additive
+   * field is the ONLY permitted drift on frozenContracts.ts.
+   */
+  threshold?: 'warning' | 'alert';
 }
 
 // ── AuditSplitProps — SUPERSEDES FR-0 frozen shape (closes W-1) ──────────────

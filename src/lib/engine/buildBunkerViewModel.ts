@@ -11,6 +11,7 @@
 import type { Transaction } from '@/lib/types/transaction';
 import type { ISODate } from '@/lib/engine/parseDate';
 import { computeBunkerTarget } from '@/lib/engine/computeBunkerTarget';
+import { deriveThreshold } from '@/lib/engine/deriveThreshold';
 import {
   NEEDS_LABELS,
   WANTS_LABELS,
@@ -213,5 +214,17 @@ export function buildBunkerViewModel(transactions: readonly Transaction[]): Bunk
     ownerId,
   };
 
-  return { header, hero, macroGrid, auditSplit, summary };
+  // FR-4 (REQ-AGG-6): derive threshold band from the already-computed
+  // (currentCash, bunkerTarget). Use conditional spread so the field is
+  // OMITTED — not assigned undefined — under exactOptionalPropertyTypes.
+  const threshold: 'warning' | 'alert' | undefined = deriveThreshold(currentCash, bunkerTarget);
+
+  return {
+    header,
+    hero,
+    macroGrid,
+    auditSplit,
+    summary,
+    ...(threshold !== undefined ? { threshold } : {}),
+  };
 }

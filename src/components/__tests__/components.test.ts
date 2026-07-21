@@ -309,6 +309,58 @@ describe('MacroGrid renders cards', () => {
   });
 });
 
+// ── W-H: MacroGrid threshold wiring (REQ-UI-17, FR-4) ──────────────────────
+//
+// These tests assert the color class actually reaches the rendered HTML for
+// each threshold branch. The shared pure helper amountColorClass is
+// unit-tested in src/lib/engine/__tests__/amountColor.test.ts; here we
+// verify the prop is threaded correctly into the rendered output.
+//
+// Threshold prop is extended LOCALLY on MacroGrid (not on MacroGridProps in
+// frozenContracts) — see app/page.tsx for the page-thread.
+describe('MacroGrid threshold wiring (REQ-UI-17)', () => {
+  const baseCards = [
+    { label: 'Income', value: 100, trend: 'up' },
+    { label: 'Wants', value: -50, trend: 'down' },
+  ];
+
+  it('renders text-fuchsia-500 when threshold="warning"', () => {
+    const html = renderToStaticMarkup(
+      createElement(MacroGrid, { cards: baseCards, threshold: 'warning' }),
+    );
+
+    // The threshold branch must be applied to the numeric value containers
+    expect(html).toContain('text-fuchsia-500');
+    // No emerald/red leakage from the sign-only fallback for these values
+    expect(html).not.toContain('text-emerald-400');
+    expect(html).not.toContain('text-red-400');
+  });
+
+  it('renders text-pink-400 when threshold="alert"', () => {
+    const html = renderToStaticMarkup(
+      createElement(MacroGrid, { cards: baseCards, threshold: 'alert' }),
+    );
+
+    expect(html).toContain('text-pink-400');
+    expect(html).not.toContain('text-emerald-400');
+    expect(html).not.toContain('text-red-400');
+  });
+
+  it('renders text-emerald-400 for a positive value when threshold is undefined', () => {
+    const html = renderToStaticMarkup(
+      createElement(MacroGrid, {
+        cards: [{ label: 'Income', value: 100, trend: 'up' }],
+        threshold: undefined,
+      }),
+    );
+
+    expect(html).toContain('text-emerald-400');
+    // Threshold branches must NOT appear in the undefined path
+    expect(html).not.toContain('text-fuchsia-500');
+    expect(html).not.toContain('text-pink-400');
+  });
+});
+
 describe('Zero-state render (empty store)', () => {
   it('renders all four components without throwing against an empty store', () => {
     const zeroFixtures = buildBunkerViewModel([]);
