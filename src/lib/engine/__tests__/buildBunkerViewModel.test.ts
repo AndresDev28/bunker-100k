@@ -299,3 +299,41 @@ describe('aggregate: buildBunkerViewModel', () => {
     expect(result.header.title).toBe(HERO_TITLE);
   });
 });
+
+// ── FR-4 / REQ-AGG-6 — threshold derive rule (strict-TDD) ──────────────────
+//
+// Two integration scenarios pin the wiring between buildBunkerViewModel and
+// deriveThreshold. They cover:
+//   1. The placeholder-cash wiring: non-empty txs with bunkerTarget > 0 and
+//      currentCash=0 → threshold === 'alert'.
+//   2. The zero-state wiring: empty txs → threshold === undefined (no NaN,
+//      REQ-AGG-5 holds).
+describe('aggregate: buildBunkerViewModel — threshold wiring (REQ-AGG-6)', () => {
+  it('yields threshold="alert" for non-empty txs with placeholder cash=0', async () => {
+    resetIds();
+    const { buildBunkerViewModel } = await import('../buildBunkerViewModel');
+
+    // Any non-empty transaction set drives bunkerTarget > 0 while currentCash
+    // is pinned to the FR-3 placeholder 0 → deriveThreshold(0, >0) === 'alert'.
+    const txns: Transaction[] = [
+      makeTx({ amount: -800, category: { tier: 'needs', subcategory: 'housing' } }),
+      makeTx({ amount: -200, category: { tier: 'needs', subcategory: 'groceries' } }),
+    ];
+
+    const result = buildBunkerViewModel(txns);
+
+    expect(result.summary.bunkerTarget).toBeGreaterThan(0);
+    expect(result.summary.currentCash).toBe(0);
+    expect(result.threshold).toBe('alert');
+  });
+
+  it('yields threshold=undefined for an empty transaction set (zero-state, REQ-AGG-5)', async () => {
+    resetIds();
+    const { buildBunkerViewModel } = await import('../buildBunkerViewModel');
+
+    const result = buildBunkerViewModel([]);
+
+    expect(result.summary.bunkerTarget).toBe(0);
+    expect(result.threshold).toBeUndefined();
+  });
+});
