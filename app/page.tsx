@@ -31,7 +31,7 @@ export default async function Page() {
     <main>
       <BunkerHeader {...fixtures.header} />
       <BunkerHero {...fixtures.hero} />
-      <MacroGrid {...fixtures.macroGrid} />
+      <MacroGrid {...fixtures.macroGrid} threshold={fixtures.threshold} />
       <AuditSplit {...fixtures.auditSplit} />
     </main>
   );
