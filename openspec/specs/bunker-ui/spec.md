@@ -3,7 +3,7 @@
 ## Capability
 ADDED — the production UI surface consuming the frozen `BunkerFixtures` contract. Cross-refs: project `spec §3` (component layout, deferred styling), `§4` (strict TDD); proposal A2 (frozen vocab/labels), A4 (sandbox untouched), A5 (un-styled), A7 (prop re-freeze), C2 (`@/components/*`).
 
-> **Note 2026-07-20**: REQ-UI-5 SUPERSEDED by REQ-UI-12..17. Two REQ-UI scenarios are intentionally relaxed (REQ-UI-13 pink-400 reserved for future FRs; REQ-UI-17 warning/alert thresholds deferred until aggregate exposes a threshold field). See the relaxed scenarios for the precise language.
+> **Note 2026-07-22 (FR-4 update)**: REQ-UI-5 SUPERSEDED by REQ-UI-12..17 (FR-3, 2026-07-20). The two REQ-UI scenarios intentionally relaxed by FR-3 were lifted by FR-4 (`fr4-threshold-amount-color`, 2026-07-22, PR #13 → commit `973cdeb`): REQ-UI-13 Scenario 2 `pink-400` reservation is now CONSUMED (alert branch of `amountColorClass`), and REQ-UI-17 warning/alert threshold branches are now ACTIVE (`text-fuchsia-500` / `text-pink-400`). See REQ-UI-13 Scenario 2 and the REQ-UI-17 scenarios for current language. The frozenContracts T8 reversal (additive `threshold?: 'warning' | 'alert'` on `BunkerFixtures`) is the sole permitted contract drift.
 
 ## ADDED Requirements
 
@@ -90,12 +90,11 @@ The `bunker-ui` surface MUST apply a fixed palette with documented contrast rati
 - **THEN** it MUST use Tailwind class `text-fuchsia-500` or `border-fuchsia-500` or `bg-fuchsia-500`
 - **AND** the contrast against `zinc-950` MUST be at least 4.5:1 (WCAG AA, measured ≥6.3:1 for fuchsia-500).
 
-#### Scenario: Complementary accent on base (reserved for future FRs)
-- **GIVEN** the FR-3 implementation is deployed
+#### Scenario: Complementary accent on base (reservation consumed)
+- **GIVEN** the FR-4 implementation is deployed
 - **WHEN** the implementation is reviewed
-- **THEN** `pink-400` is RESERVED in the design token table as the complementary attention accent (contrast ≥7.8:1 AAA on zinc-950)
-- **AND** its first concrete use in production code is deferred to a follow-up FR that introduces a feature requiring attention accent (e.g. warning/alert states, prominent CTAs)
-- **AND** the absence of `pink-400` in the FR-3 source MUST NOT be treated as a defect — the token is intentionally unused at this stage.
+- **THEN** the `pink-400` reservation is CONSUMED: its first concrete production use is the alert branch of `amountColorClass` (REQ-UI-17)
+- **AND** the presence of `pink-400` in production source MUST NOT be treated as a defect — it is the consumed reservation.
 
 #### Scenario: Body text floor
 - **WHEN** any body or label text is rendered against `zinc-950`
@@ -136,39 +135,59 @@ The `bunker-ui` surface MUST NOT introduce any motion, transition, or animation.
 - **THEN** no CSS `@media (prefers-reduced-motion: ...)` block is required (because no motion exists to reduce).
 
 ### Requirement: REQ-UI-17: MacroGrid Semantic Color Mapping
-The `MacroGrid` component MUST map amount sign to color using an inline CSS rule, without mutating `frozenContracts.ts`.
+The `MacroGrid` component MUST map each card's amount to a semantic color class by consuming the shared pure helper `amountColorClass(amount, threshold?)` and forwarding `BunkerFixtures.threshold`.
 
 #### Scenario: Positive amounts
-- **WHEN** `MacroGrid` renders a card with a positive amount
-- **THEN** the numeric value MUST be rendered with `text-emerald-400`.
+
+- **GIVEN** a card whose numeric value is `> 0` and `threshold` is `undefined`
+- **WHEN** `MacroGrid` renders the card
+- **THEN** the numeric value MUST carry `text-emerald-400`
 
 #### Scenario: Negative amounts
-- **WHEN** `MacroGrid` renders a card with a negative amount
-- **THEN** the numeric value MUST be rendered with `text-red-400` (or `text-rose-400`).
 
-#### Scenario: Warning / alert thresholds (deferred)
-- **GIVEN** the FR-3 implementation is deployed
+- **GIVEN** a card whose numeric value is `< 0` and `threshold` is `undefined`
+- **WHEN** `MacroGrid` renders the card
+- **THEN** the numeric value MUST carry `text-red-400` (or `text-rose-400`)
+
+#### Scenario: Warning threshold active
+
+- **GIVEN** `BunkerFixtures.threshold === 'warning'`
+- **WHEN** `MacroGrid` renders any card
+- **THEN** the numeric value MUST carry `text-fuchsia-500`
+
+#### Scenario: Alert threshold active
+
+- **GIVEN** `BunkerFixtures.threshold === 'alert'`
+- **WHEN** `MacroGrid` renders any card
+- **THEN** the numeric value MUST carry `text-pink-400`
+- **AND** this is the first production use of the reserved `pink-400` token (REQ-UI-13)
+
+#### Scenario: Threshold overrides sign mapping
+
+- **GIVEN** a defined `threshold` and an amount of any sign (including `0`)
+- **WHEN** the color class is resolved
+- **THEN** the threshold branch MUST win over the sign branches
+
+#### Scenario: Scoped contract extension (T8 reversal)
+
 - **WHEN** the implementation is reviewed
-- **THEN** the `amountColorClass` helper in `MacroGrid.tsx` MUST be implemented as `function amountColorClass(amount: number): string` (single-argument sign-based mapping only)
-- **AND** the warning/alert threshold branches (`text-fuchsia-500` for warning, `text-pink-400` for alert) are DEFERRED to a follow-up FR that exposes a `threshold?: 'warning' | 'alert'` field on the `BunkerFixtures` aggregate
-- **AND** when that follow-up FR ships, the helper MUST be updated to `amountColorClass(amount: number, threshold?: 'warning' | 'alert'): string` to satisfy this scenario.
+- **THEN** `src/sandbox-bridge/frozenContracts.ts` MAY differ from the FR-3-archived byte state ONLY by the additive `threshold?: 'warning' | 'alert'` field on `BunkerFixtures`
+- **AND** no other contract drift is permitted — no `tone`/color prop on `MacroGridProps`, `BunkerHeroProps`, `AuditSplitProps`, or `BunkerHeaderProps`
 
-#### Scenario: No view-model mutation
+#### Scenario: Helper module location
+
 - **WHEN** the implementation is reviewed
-- **THEN** `src/sandbox-bridge/frozenContracts.ts` MUST be byte-identical to the FR-2-archived version
-- **AND** no `tone` or color prop MAY be added to `BunkerFixtures` or any `BunkerHero` / `MacroGrid` / `AuditSplit` / `BunkerHeader` prop type.
+- **THEN** the sign/threshold→color mapping MUST live in one shared pure module (`src/lib/engine/amountColor.ts`)
+- **AND** `MacroGrid.tsx` MUST import it; no local switch, `<style jsx>`, or co-located reimplementation of the mapping MAY remain
 
-#### Scenario: Inline CSS rule location
-- **WHEN** the implementation is reviewed
-- **THEN** the sign-to-color mapping rule MUST live in `MacroGrid.tsx` (either as a local `className` switch or as a `<style jsx>` block or as a co-located helper function).
+#### Scenario: Helper signature and return matrix
 
-#### Scenario: Helper signature is single-argument in FR-3
-- **WHEN** the FR-3 implementation is reviewed
-- **THEN** the `amountColorClass` helper in `MacroGrid.tsx` MUST be defined as `function amountColorClass(amount: number): string` (no `threshold` parameter)
-- **AND** the return values MUST be:
-  - `amount > 0` → `text-emerald-400`
-  - `amount < 0` → `text-red-400`
-  - `amount === 0` → `text-zinc-400`.
+- **WHEN** the exported helper is reviewed
+- **THEN** its signature MUST be
+  `amountColorClass(amount: number, threshold?: 'warning' | 'alert'): string`
+- **AND** the return matrix MUST be: `'alert'` → `text-pink-400`; `'warning'` →
+  `text-fuchsia-500`; otherwise `amount > 0` → `text-emerald-400`, `amount < 0` →
+  `text-red-400`, `amount === 0` → `text-zinc-400`
 
 ## Strict-TDD Test Blocks (cross-ref spec §4)
 The following named Vitest blocks MUST pass natively before implementation is accepted. Component tests favor prop-shape + minimal-render assertions; snapshot tests are used ONLY if the project's Vitest config supports them.
@@ -180,9 +199,12 @@ The following named Vitest blocks MUST pass natively before implementation is ac
   - `it('sources every visible string from src/lib/labels.ts — zero inline literals')`
 - `describe('app/page.tsx zero-state')`
   - `it('renders all four components without throwing against an empty store')`
+- `describe('amountColorClass')` (FR-4) — all five return paths plus threshold-over-sign precedence
+- `describe('MacroGrid threshold wiring')` (FR-4) — `'warning' | 'alert' | undefined` renders the matching class
 
 ## Cross-references
 - Project `spec §3` (component layout + deferred dark-minimalist styling), `§4` (strict-TDD gate).
 - Proposal A2, A4, A5, A7, C2.
-- See also `bunker-read-action` (REQ-READ-1) and `bunker-aggregate` (REQ-AGG-1, REQ-AGG-5).
+- See also `bunker-read-action` (REQ-READ-1) and `bunker-aggregate` (REQ-AGG-1, REQ-AGG-5, REQ-AGG-6).
 - See also `fr3-ui-styling` archive: REQ-UI-5 SUPERSEDED 2026-07-20; styling contract moved to REQ-UI-12..17.
+- See also `fr4-threshold-amount-color` archive (2026-07-22, PR #13 → `973cdeb`): REQ-UI-13 Scenario 2 reservation consumed; REQ-UI-17 lifted from FR-3 single-argument relaxation to `(amount, threshold?)`; frozenContracts T8 reversal scoped to additive `threshold?` on `BunkerFixtures`.
