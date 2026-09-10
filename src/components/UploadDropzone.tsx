@@ -16,12 +16,14 @@ import React, { useCallback, useState, type ReactNode } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import { ingestFromUpload } from '@/app/actions/ingestFromUpload';
+import type { IngestResult } from '@/lib/types/ingest';
 import {
   LABEL_UPLOAD_ACTIVE,
   LABEL_UPLOAD_BUSY,
   LABEL_UPLOAD_BUTTON,
   LABEL_UPLOAD_ERROR,
   LABEL_UPLOAD_PROMPT,
+  labelUploadResult,
 } from '@/lib/labels';
 
 const FILES_FIELD = 'files';
@@ -30,10 +32,12 @@ export function UploadDropzone(): ReactNode {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<IngestResult | null>(null);
 
   const onDropAccepted = useCallback(
     async (files: readonly File[]): Promise<void> => {
       setError(null);
+      setResult(null);
       setIsPending(true);
       try {
         // One FormData for the whole batch — the Server Action fans out over
@@ -41,7 +45,8 @@ export function UploadDropzone(): ReactNode {
         const formData = new FormData();
         for (const file of files) formData.append(FILES_FIELD, file);
 
-        await ingestFromUpload(formData);
+        const ingestResult = await ingestFromUpload(formData);
+        setResult(ingestResult);
         router.refresh();
       } catch {
         setError(LABEL_UPLOAD_ERROR);
@@ -65,6 +70,8 @@ export function UploadDropzone(): ReactNode {
     onDropRejected,
   });
 
+  const resultIsPartial = result !== null && result.skipped > 0;
+
   return (
     <section className="mb-6">
       <div
@@ -80,6 +87,15 @@ export function UploadDropzone(): ReactNode {
         </button>
       </div>
       {error === null ? null : <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {result === null ? null : (
+        <p
+          className={
+            resultIsPartial ? 'mt-2 text-sm text-yellow-400' : 'mt-2 text-sm text-emerald-400'
+          }
+        >
+          {labelUploadResult(result)}
+        </p>
+      )}
     </section>
   );
 }
