@@ -17,6 +17,7 @@ import { BunkerHeader } from '@/components/BunkerHeader';
 import { BunkerHero } from '@/components/BunkerHero';
 import { MacroGrid } from '@/components/MacroGrid';
 import { AuditSplit } from '@/components/AuditSplit';
+import { UploadDropzone } from '../src/components/UploadDropzone';
 
 // Force dynamic rendering — the page reads from the filesystem (loadTransactions),
 // which is not available at build time. Next.js would otherwise attempt to prerender
@@ -30,6 +31,9 @@ export default async function Page() {
   return (
     <main>
       <BunkerHeader {...fixtures.header} />
+      {/* REQ-UI-20: ingest surface sits above the hero — it is the action that
+          produces everything rendered below it. */}
+      <UploadDropzone />
       <BunkerHero {...fixtures.hero} />
       <MacroGrid {...fixtures.macroGrid} threshold={fixtures.threshold} />
       <AuditSplit {...fixtures.auditSplit} />
