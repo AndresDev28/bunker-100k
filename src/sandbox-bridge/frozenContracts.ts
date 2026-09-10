@@ -16,7 +16,7 @@ import type { ISODate } from '../lib/engine/parseDate';
 
 export type NeedsSubcategory = 'housing' | 'groceries' | 'utilities' | 'liabilities';
 
-export type WantsSubcategory = 'restoration' | 'subscriptions' | 'variables';
+export type WantsSubcategory = 'restoration' | 'subscriptions' | 'variables' | 'shopping';
 
 export type Eur = number;
 

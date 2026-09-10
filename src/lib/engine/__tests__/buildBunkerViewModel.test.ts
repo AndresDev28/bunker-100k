@@ -62,7 +62,7 @@ describe('aggregate: buildBunkerViewModel', () => {
 
     // AuditSplit — frozen-length arrays, zero amounts
     expect(result.auditSplit.needs).toHaveLength(4);
-    expect(result.auditSplit.wants).toHaveLength(3);
+    expect(result.auditSplit.wants).toHaveLength(4);
     for (const line of result.auditSplit.needs) {
       expect(line.amount).toBe(0);
       expect(line.budget).toBe(0);
@@ -97,7 +97,7 @@ describe('aggregate: buildBunkerViewModel', () => {
     }
   });
 
-  it('groups needs into the 4 frozen subcategories and wants into the 3 frozen', async () => {
+  it('groups needs into the 4 frozen subcategories and wants into the 4 frozen', async () => {
     resetIds();
     const { buildBunkerViewModel } = await import('../buildBunkerViewModel');
 
@@ -120,9 +120,9 @@ describe('aggregate: buildBunkerViewModel', () => {
     const needsKeys = result.auditSplit.needs.map((l) => l.subcategory);
     expect(needsKeys).toEqual(['housing', 'groceries', 'utilities', 'liabilities']);
 
-    // Wants — exactly 3 lines, keyed by frozen vocab
+    // Wants — exactly 4 lines, keyed by frozen vocab (T8 reversal added 'shopping')
     const wantsKeys = result.auditSplit.wants.map((l) => l.subcategory);
-    expect(wantsKeys).toEqual(['restoration', 'subscriptions', 'variables']);
+    expect(wantsKeys).toEqual(['restoration', 'subscriptions', 'variables', 'shopping']);
 
     // Needs amounts — |amt| summed per subcategory
     const needsBySub = Object.fromEntries(

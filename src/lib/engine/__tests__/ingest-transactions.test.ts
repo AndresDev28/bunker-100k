@@ -40,15 +40,32 @@ describe('ingestTransactions', () => {
     expect(r1[0]!.cleanedDescription).toBe(r2[0]!.cleanedDescription);
   });
 
-  it('category matches classify(amount)', () => {
+  it('category matches classify(description, amount)', () => {
     const csvNeg = `Date,Description,Amount\n2026-03-01,Test,-10.00`;
     const csvPos = `Date,Description,Amount\n2026-03-01,Test,5000.00`;
     const negRows = parseCsv(csvNeg, { dateFormat: 'YYYY-MM-DD' });
     const posRows = parseCsv(csvPos, { dateFormat: 'YYYY-MM-DD' });
     const negResult = ingestTransactions(negRows, 'self', '/a.csv');
     const posResult = ingestTransactions(posRows, 'self', '/b.csv');
+    // 'Test' matches no DEFAULT_SUBRULES keyword → sign-fallback applies.
     expect(negResult[0]!.category.tier).toBe('wants'); // negative → wants
     expect(posResult[0]!.category.tier).toBe('income'); // positive → income
+  });
+
+  it('threads row.description into classify — keyword rules beat the sign-fallback', () => {
+    // Call-site guard for the FR-2 signature migration: if ingestTransactions
+    // still called classify(row.amount), both rows below would fall through to
+    // the sign-fallback (wants/variables) instead of hitting a keyword rule.
+    const csv = `Date,Description,Amount
+2026-03-01,NETFLIX.COM MONTHLY,-15.99
+2026-03-02,MERCADOLÍBRE COMPRA,-30.00
+2026-03-03,ACME SALARY DEPOSIT,3500.00`;
+    const rows = parseCsv(csv, { dateFormat: 'YYYY-MM-DD' });
+    const result = ingestTransactions(rows, 'self', '/x.csv');
+
+    expect(result[0]!.category).toEqual({ tier: 'wants', subcategory: 'subscriptions' });
+    expect(result[1]!.category).toEqual({ tier: 'wants', subcategory: 'shopping' });
+    expect(result[2]!.category).toEqual({ tier: 'income', subcategory: 'salary' });
   });
 
   it('ownerId is the passed parameter', () => {

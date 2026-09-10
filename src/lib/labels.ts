@@ -30,6 +30,13 @@ export const TREND_SAVE_RATE = '— baseline';
 export const LABEL_BUNKER_TARGET = 'Bunker Target';
 export const LABEL_SAVE_RATE_GATE = 'Save Rate';
 
+// UploadDropzone (REQ-UI-20)
+export const LABEL_UPLOAD_PROMPT = 'Drag & drop CSVs here';
+export const LABEL_UPLOAD_ACTIVE = 'Drop to ingest';
+export const LABEL_UPLOAD_BUTTON = 'Select CSV files';
+export const LABEL_UPLOAD_BUSY = 'Ingesting…';
+export const LABEL_UPLOAD_ERROR = 'Upload failed. Check the file and try again.';
+
 // Subcategory display maps
 export const NEEDS_LABELS: Record<NeedsSubcategory, string> = {
   housing: 'Housing',
@@ -42,6 +49,7 @@ export const WANTS_LABELS: Record<WantsSubcategory, string> = {
   restoration: 'Restoration',
   subscriptions: 'Subscriptions',
   variables: 'Variables',
+  shopping: 'Shopping',
 };
 
 // Micro-metadata templates

@@ -1,18 +1,32 @@
+import { DEFAULT_SUBRULES } from '@/lib/classification/defaultRules';
+import { matchRule, type SubcategoryRule } from '@/lib/classification/subcategoryRules';
 import type { CategoryRef } from '@/lib/types/category';
 
 /**
- * FR-1 sign-based classification stub.
+ * FR-2 keyword classification (REQ-CLS-2).
  *
- * REQ-DEDUP-4: amount < 0 → wants.variables, amount >= 0 → income.salary.
+ * Pipeline:
+ *   1. A non-blank description is matched against `rules ?? DEFAULT_SUBRULES`.
+ *      The first matching rule wins (REQ-CLS-1/3).
+ *   2. Otherwise the FR-1 sign-fallback applies: `amount > 0` → income/salary,
+ *      `amount <= 0` → wants/variables. Zero has no sign, so by convention it is
+ *      treated as an outflow (REQ-DEDUP-4).
  *
- * This stub exists so FR-2's keyword matcher can replace the body in a
- * single file — the CategoryRef shape is preserved across the hand-off.
- * The zero-is-wants convention is intentional: zero has no sign, so it
- * falls through to the fallback that FR-2 keyword-matching can override.
+ * Passing `rules` explicitly — including `[]` — bypasses `DEFAULT_SUBRULES`
+ * entirely (REQ-CLS-6). Pure: no I/O, no clock.
  */
-export function classify(amount: number): CategoryRef {
+export function classify(
+  description: string,
+  amount: number,
+  rules?: readonly SubcategoryRule[],
+): CategoryRef {
+  // REQ-CLS-5: a blank description short-circuits straight to the sign-fallback,
+  // no match attempt is performed.
+  if (description.trim() !== '') {
+    const match = matchRule(description, rules ?? DEFAULT_SUBRULES);
+    if (match) return { tier: match.tier, subcategory: match.subcategory };
+  }
+
   if (amount > 0) return { tier: 'income', subcategory: 'salary' };
-  // amount <= 0 falls through: zero has no sign, treated as non-income.
-  // FR-2 keyword-matcher can override this fallback for explicit zero cases.
   return { tier: 'wants', subcategory: 'variables' };
 }

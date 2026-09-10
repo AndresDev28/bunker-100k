@@ -20,9 +20,9 @@ describe('labels port', () => {
     expect(keys).toEqual(['groceries', 'housing', 'liabilities', 'utilities']);
   });
 
-  it('WANTS_LABELS has exactly 3 keys matching re-frozen WantsSubcategory', () => {
+  it('WANTS_LABELS has exactly 4 keys matching re-frozen WantsSubcategory', () => {
     const keys = Object.keys(WANTS_LABELS).sort();
-    expect(keys).toEqual(['restoration', 'subscriptions', 'variables']);
+    expect(keys).toEqual(['restoration', 'shopping', 'subscriptions', 'variables']);
   });
 
   it('NEEDS_LABELS display strings match sandbox verbatim', () => {
