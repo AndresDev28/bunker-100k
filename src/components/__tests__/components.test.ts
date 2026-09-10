@@ -408,6 +408,14 @@ vi.mock('@/app/actions/loadTransactions', () => ({
   loadTransactions: vi.fn(),
 }));
 
+// app/page.tsx now renders <UploadDropzone/> (REQ-UI-20), a client component.
+// `useRouter` requires a mounted App Router context, which react-dom/server has
+// no notion of — same server/client boundary reason loadTransactions is mocked
+// above. The dropzone's own behavior is covered in UploadDropzone.test.ts.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
+
 describe('app/page.tsx zero-state', () => {
   it('renders all four components without throwing against an empty store', async () => {
     const { loadTransactions } = await import('@/app/actions/loadTransactions');

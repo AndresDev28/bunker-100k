@@ -49,7 +49,7 @@ const NEEDS_KEYS: readonly NeedsSubcategory[] = [
   'liabilities',
 ];
 
-const WANTS_KEYS: readonly WantsSubcategory[] = ['restoration', 'subscriptions', 'variables'];
+const WANTS_KEYS: readonly WantsSubcategory[] = ['restoration', 'subscriptions', 'variables', 'shopping'];
 
 // ── Aggregate ────────────────────────────────────────────────────────────────
 
@@ -74,6 +74,7 @@ export function buildBunkerViewModel(transactions: readonly Transaction[]): Bunk
     restoration: 0,
     subscriptions: 0,
     variables: 0,
+    shopping: 0,
   };
 
   for (const t of transactions) {

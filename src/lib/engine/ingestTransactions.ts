@@ -11,7 +11,7 @@ import type { Transaction } from '@/lib/types/transaction';
  * Each Transaction gets:
  * - id = SHA-256(date | cleanedDescription | amount) — dedup key
  * - cleanedDescription = normalized for hashing
- * - category = sign-based stub (FR-2 replaces body)
+ * - category = keyword rules with sign-fallback (FR-2, REQ-CLS-2)
  * - firstSeenAt = wall-clock ISO-8601 at moment of ingestion
  * - ownerId / sourceFile = passed through
  *
@@ -33,7 +33,7 @@ export function ingestTransactions(
       description: row.description,
       cleanedDescription,
       amount: row.amount,
-      category: classify(row.amount),
+      category: classify(row.description, row.amount),
       ownerId,
       firstSeenAt: now,
       sourceFile,
