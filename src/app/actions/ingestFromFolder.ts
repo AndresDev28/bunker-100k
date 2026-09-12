@@ -13,7 +13,7 @@
  */
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { parseCsv } from '@/lib/engine/parseCsv';
+import { parseCsvAdaptive } from '@/lib/engine/parseCsvAdaptive';
 import { ingestTransactions } from '@/lib/engine/ingestTransactions';
 import { readStore, upsertTransactions } from '@/lib/engine/store';
 import { appendIngestLog } from '@/lib/engine/logger';
@@ -58,9 +58,9 @@ export async function ingestFromFolder(input?: {
       continue;
     }
 
-    let rows: Awaited<ReturnType<typeof parseCsv>> = [];
+    let rows: Awaited<ReturnType<typeof parseCsvAdaptive>> = [];
     try {
-      rows = parseCsv(raw);
+      rows = parseCsvAdaptive(raw);
     } catch {
       await appendIngestLog(stateDir, {
         kind: 'skip',

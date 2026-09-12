@@ -26,7 +26,7 @@ type ColumnMap = {
  * Split a CSV line respecting double-quoted fields (commas inside quotes don't split).
  * Also strips the surrounding double quotes and unescapes "" → ".
  */
-function splitCsvLine(line: string): string[] {
+export function splitCsvLine(line: string): string[] {
   const cells: string[] = [];
   let current = '';
   let inQuotes = false;
