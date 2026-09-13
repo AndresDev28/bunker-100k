@@ -11,7 +11,7 @@
  */
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { parseCsv } from '@/lib/engine/parseCsv';
+import { parseCsvAdaptive } from '@/lib/engine/parseCsvAdaptive';
 import { ingestTransactions } from '@/lib/engine/ingestTransactions';
 import { readStore, upsertTransactions } from '@/lib/engine/store';
 import { appendIngestLog } from '@/lib/engine/logger';
@@ -58,9 +58,9 @@ export async function ingestFromUpload(formData: FormData): Promise<IngestResult
       continue;
     }
 
-    let rows: ReturnType<typeof parseCsv>;
+    let rows: ReturnType<typeof parseCsvAdaptive>;
     try {
-      rows = parseCsv(raw);
+      rows = parseCsvAdaptive(raw);
     } catch {
       // parseCsv is all-or-nothing per file, so one malformed row skips the file.
       await appendIngestLog(stateDir, {
