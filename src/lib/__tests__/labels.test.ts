@@ -12,6 +12,7 @@ import {
   microProgress,
   microSurvivalCost,
   optimizationFooter,
+  labelUploadResult,
 } from '../labels';
 
 describe('labels port', () => {
@@ -50,7 +51,37 @@ describe('labels port', () => {
     expect(microSurvivalCost(1500)).toBe('*Survival Monthly Cost: 1,500 €/mo');
   });
 
-  it('optimizationFooter template produces correct output', () => {
-    expect(optimizationFooter(200)).toBe('*Optimization potential: +200 €/mo');
-  });
-});
+      it('optimizationFooter template produces correct output', () => {
+        expect(optimizationFooter(200)).toBe('*Optimization potential: +200 €/mo');
+      });
+
+      it('labelUploadResult — partial (skipped > 0) surfaces the warning', () => {
+        expect(labelUploadResult({ ingested: 3, deduped: 0, skipped: 2 })).toBe(
+          'Ingested 3, skipped 2 rows (parse errors). See ingest.log.',
+        );
+      });
+
+      it('labelUploadResult — success with dedup', () => {
+        expect(labelUploadResult({ ingested: 4, deduped: 1, skipped: 0 })).toBe(
+          'Ingested 4, deduped 1 (already in store).',
+        );
+      });
+
+      it('labelUploadResult — pure success', () => {
+        expect(labelUploadResult({ ingested: 5, deduped: 0, skipped: 0 })).toBe(
+          'Ingested 5 transactions.',
+        );
+      });
+
+      it('labelUploadResult — re-upload with only dedup hits (idempotent)', () => {
+        expect(labelUploadResult({ ingested: 0, deduped: 5, skipped: 0 })).toBe(
+          'Already up to date — deduped 5.',
+        );
+      });
+
+      it('labelUploadResult — empty result fallback', () => {
+        expect(labelUploadResult({ ingested: 0, deduped: 0, skipped: 0 })).toBe(
+          'No rows ingested.',
+        );
+      });
+    });

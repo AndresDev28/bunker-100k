@@ -37,6 +37,31 @@ export const LABEL_UPLOAD_BUTTON = 'Select CSV files';
 export const LABEL_UPLOAD_BUSY = 'Ingesting…';
 export const LABEL_UPLOAD_ERROR = 'Upload failed. Check the file and try again.';
 
+// UploadDropzone result banner — formats the IngestResult counts into a single
+// human-readable line. Three branches:
+//   - skipped > 0  → partial (warn the user, point at the log)
+//   - ingested > 0 → success
+//   - only deduped → idempotent re-upload (still success, but call it out)
+export const labelUploadResult = (result: {
+  ingested: number;
+  deduped: number;
+  skipped: number;
+}): string => {
+  if (result.skipped > 0) {
+    return `Ingested ${result.ingested}, skipped ${result.skipped} rows (parse errors). See ingest.log.`;
+  }
+  if (result.ingested > 0 && result.deduped > 0) {
+    return `Ingested ${result.ingested}, deduped ${result.deduped} (already in store).`;
+  }
+  if (result.ingested > 0) {
+    return `Ingested ${result.ingested} transactions.`;
+  }
+  if (result.deduped > 0) {
+    return `Already up to date — deduped ${result.deduped}.`;
+  }
+  return 'No rows ingested.';
+};
+
 // Subcategory display maps
 export const NEEDS_LABELS: Record<NeedsSubcategory, string> = {
   housing: 'Housing',
